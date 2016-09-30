@@ -105,5 +105,5 @@ composer require atk4/schema
 
 ## Current Status
 
-Early development
+Stable functionality
 
