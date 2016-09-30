@@ -1,10 +1,10 @@
 {
-    "name": "atk4/audit",
+    "name": "atk4/schema",
     "type": "library",
-    "description": "Agile Data - Audit Extension",
-    "keywords": ["agile", "data", "framework", "audit", "event sourcing", "crud", "acl"],
-    "homepage": "http://agiletoolkit.org/data/extension/audit",
-    "license": "Commercial",
+    "description": "Agile Schema",
+    "keywords": ["agile", "schema", "data", "migration", "alter", "sql", "framework"],
+    "homepage": "http://github.com/atk4/schema",
+    "license": "MIT",
     "authors": [
         {
             "name": "Romans Malinovskis",
@@ -14,18 +14,19 @@
     ],
     "require": {
         "php": ">=5.5.0",
-        "atk4/data": "^1.1"
+        "atk4/dsql": "^1.0",
+        "atk4/core": "^1.1"
     },
     "require-dev": {
         "phpunit/phpunit": "4.*",
         "codeclimate/php-test-reporter": "*"
     },
     "autoload": {
-        "psr-4": {"atk4\\data\\audit\\":"src/"}
+        "psr-4": {"atk4\\schema\\":"src/"}
     },
     "autoload-dev": {
         "psr-4": {
-          "atk4\\data\\audit\\tests\\":"tests/"
+          "atk4\\schema\\tests\\":"tests/"
         }
     }
 }
