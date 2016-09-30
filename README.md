@@ -19,7 +19,6 @@ Resources and Community:
 
 Stats:
 
-[![License](https://poser.pugx.org/atk4/schema/license)](https://packagist.org/packages/atk4/schema)
 [![Version](https://badge.fury.io/gh/atk4%2Fschema.svg)](https://packagist.org/packages/atk4/schema)
 
 
@@ -65,6 +64,36 @@ $a = new \atk4\data\schema\AutoCreator($m_order);
 $a = new \atk4\data\schema\AutoCreator($m_order, ['no_auto' => true]);
 $a->compare()->execute();
 ```
+
+## Integration with PHPUnit
+
+You can now automate your database testing by setting and checking your
+database contents easier. First, extend your test-script from
+`\atk4\schema\PHPUnit_SchemaTestCase`. 
+
+Next, you need to set your schema
+
+``` php
+$q = ['user' => [
+    ['name' => 'John', 'surname' => 'Smith'],
+    ['name' => 'Steve', 'surname' => 'Jobs'],
+]];
+$this->setDB($q);
+```
+
+Perform any changes, then execute:
+
+```
+$this->assertEquals($q, $this->getDB('user'));
+```
+
+To ensure that database remained the same. Of course you can compare
+against any other state. 
+
+- Automatically add 'id' field by default
+- Create tables for you
+- Detect types (int, string, etc)
+- Hides ID values if you don't pass them
 
 ## Installation
 
