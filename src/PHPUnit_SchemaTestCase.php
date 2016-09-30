@@ -4,7 +4,6 @@ namespace atk4\schema;
 
 use atk4\data\Persistence_SQL;
 use atk4\dsql\Query;
-use atk4\schema\Migration;
 
 class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 {
