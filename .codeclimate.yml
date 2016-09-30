@@ -10,6 +10,32 @@ engines:
     enabled: true
     exclude_fingerprints:
     checks:
+      CyclomaticComplexity:
+        enabled: false
+      Design/TooManyPublicMethods:
+        enabled: false
+      Design/TooManyMethods:
+        enabled: false
+      Design/NpathComplexity:
+        enabled: false
+      Design/WeightedMethodCount:
+        enabled: false
+      Design/LongClass:
+        enabled: false
+      Controversial/CamelCaseMethodName:
+        enabled: false
+      Controversial/CamelCaseParameterName:
+        enabled: false
+      Controversial/CamelCasePropertyName:
+        enabled: false
+      Controversial/CamelCaseVariableName:
+        enabled: false
+      Controversial/CamelCaseClassName:
+        enabled: false
+      Naming/ShortVariable:
+        enabled: false
+      CleanCode/ElseExpression:
+        enabled: false
 
   radon:
     enabled: true
