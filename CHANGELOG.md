@@ -1,3 +1,7 @@
+## 1.0.0
+
+Initial release with working Migrator and PHPUnit schema
+
 
 ## 0.1.0
 
