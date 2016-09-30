@@ -8,7 +8,7 @@ Code Quality:
 [![Build Status](https://travis-ci.org/atk4/schema.png?branch=develop)](https://travis-ci.org/atk4/schema)
 [![Code Climate](https://codeclimate.com/github/atk4/schema/badges/gpa.svg)](https://codeclimate.com/github/atk4/schema)
 [![StyleCI](https://styleci.io/repos/69662508/shield)](https://styleci.io/repos/69662508)
-[![Test Coverage](https://codeclimate.com/github/atk4/schema/badges/coverage.svg)](https://codeclimate.com/github/atk4/data/schema)
+[![Test Coverage](https://codeclimate.com/github/atk4/schema/badges/coverage.svg)](https://codeclimate.com/github/atk4/schema)
 
 Resources and Community:
 
