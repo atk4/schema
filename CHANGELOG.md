@@ -1,3 +1,7 @@
+## 1.0.2
+
+Cleanup dependencies
+
 ## 1.0.1
 
 Added release script
