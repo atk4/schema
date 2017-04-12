@@ -12,6 +12,7 @@
             "homepage": "https://nearly.guru/"
         }
     ],
+    "prefer-stable": true,
     "require": {
         "php": ">=5.5.0",
         "atk4/dsql": "*",
