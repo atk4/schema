@@ -18,7 +18,7 @@ class Migration extends Expression
     ];
 
     /** @var \atk4\dsql\Connection Database connection */
-    protected $connection;
+    public $connection;
 
     /**
      * Create new migration.
