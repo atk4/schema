@@ -12,7 +12,131 @@ class Migration extends Expression
     protected $templates = [
         'create' => 'create table {table} ([field])',
         'drop'   => 'drop table if exists {table}',
+        'alter'   => 'alter table {table} [statements]',
     ];
+
+    // Create new migration. Argument may be dsql\Connection, data\Persistence or data\Model
+    function __construct($source, $params = [])
+    {
+        parent::__construct($params);
+
+        if ($source instanceof \atk4\dsql\Connection) {
+            $this->connection = $source;
+            return;
+        } elseif ($source instanceof \atk4\data\Persistence_SQL) {
+            $this->connection = $source->connection;
+            return;
+        } elseif ($source instanceof \atk4\data\Model) {
+            if ($model->persistence && $model->persistence instanceof \atk4\data\Persistence_SQL) {
+                $this->connection = $source->persistence->connection;
+
+                $this->setModel($source);
+            }
+        }
+
+        throw new \atk4\core\Exception([
+            'Source is specified incorrectly. Must be Connection, Persistence or initialized Model', 
+            'source'=>$source
+        ]);
+    }
+
+    public function setModel(\atk4\data\Model $m)
+    {
+        $this->table($m->table);
+
+        foreach($m->elements as $field) {
+            if (!$field instanceof \atk4\data\Field) {
+                continue;
+            }
+
+            if ($field->never_persist) {
+                continue;
+            }
+
+            if ($field instanceof \atk4\data\Field_SQL_Expression) {
+                continue;
+            }
+
+            $this->field($field->actual ?: $field->short_name);  // todo add options here
+        }
+    }
+
+    /**
+     * Will read current schema and consult current 'field' arguments, to see if they are matched.
+     * If table does not exist, will invoke ->create. If table does exist, then it will execute
+     * methods ->addField(), ->removeField()  or ->updateField() as needed, then call ->alter()
+     */
+    public function migrate()
+    {
+
+        // We use this to read fields from SQL
+        $migration2 = new self($this->connection);
+        
+        try {
+            $migration2->loadFromTable($this->table);
+        } catch (Exception $e) {
+            // should probably use custom exception clas shere
+            return $this->create();
+        }
+
+        foreach ($this->args['field'] as $field => $options) {
+            if (isset($migration2->args['field'][$field])) {
+                // field already exist. Lets compare options
+
+
+                // todo - compare options and if needed, call
+                // $this->alterField($field, $options);
+                unset($migration2->args['field'][$field]);
+            } else {
+                // new field, so
+                $this->newField($field, $options);
+            }
+        }
+
+        // remaining fields
+        foreach ($migration2->args['field'] as $field => $options) {
+            $this->removeField($args['field']);
+        }
+
+        return $this->alter();
+    }
+
+
+    /**
+     * Create rough model from current set of $this->args['fields']. This is not
+     * ideal solution but is designed as a drop-in solution.
+     */
+    public function createModel(\atk4\data\Persintence $persistence, $table = null)
+    {
+        $m = new \atk4\data\Model($persistence);
+        if ($table) {
+            $m->table = $table;
+        }
+
+        foreach ($this->args['field'] as $field => $options) {
+
+            $defaults = [];
+
+            if ($options['type']) {
+                $defaults['type'] = $options['type'];
+            }
+            $m->addField($field, $defaults);
+        }
+
+        return $m;
+    }
+
+    public function newField($field, $options = [])
+    {
+    }
+
+    public function alterField($field, $options = [])
+    {
+    }
+
+    public function removeField($field, $options = [])
+    {
+    }
 
     public function table($table)
     {
