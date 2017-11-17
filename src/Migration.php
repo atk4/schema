@@ -7,16 +7,26 @@ use atk4\dsql\Expression;
 
 class Migration extends Expression
 {
+    /** @var string Expression mode. See $templates. */
     public $mode = 'create';
 
+    /** @var array Expression templates */
     protected $templates = [
         'create' => 'create table {table} ([field])',
         'drop'   => 'drop table if exists {table}',
-        'alter'   => 'alter table {table} [statements]',
+        'alter'  => 'alter table {table} [statements]',
     ];
 
-    // Create new migration. Argument may be dsql\Connection, data\Persistence or data\Model
-    function __construct($source, $params = [])
+    /** @var \atk4\dsql\Connection Database connection */
+    protected $connection;
+
+    /**
+     * Create new migration.
+     *
+     * @param \atk4\dsql\Connection|\atk4\data\Persistence|\atk4\data\Model $source
+     * @param array                                                         $params
+     */
+    public function __construct($source, $params = [])
     {
         parent::__construct($params);
 
@@ -27,7 +37,7 @@ class Migration extends Expression
             $this->connection = $source->connection;
             return;
         } elseif ($source instanceof \atk4\data\Model) {
-            if ($model->persistence && $model->persistence instanceof \atk4\data\Persistence_SQL) {
+            if ($source->persistence && $source->persistence instanceof \atk4\data\Persistence_SQL) {
                 $this->connection = $source->persistence->connection;
 
                 $this->setModel($source);
@@ -35,16 +45,24 @@ class Migration extends Expression
         }
 
         throw new \atk4\core\Exception([
-            'Source is specified incorrectly. Must be Connection, Persistence or initialized Model', 
+            'Source is specified incorrectly. Must be Connection, Persistence or initialized Model',
             'source'=>$source
         ]);
     }
 
+    /**
+     * Sets model.
+     *
+     * @param \atk4\data\Model $m
+     *
+     * @return \atk4\data\Model
+     */
     public function setModel(\atk4\data\Model $m)
     {
         $this->table($m->table);
 
         foreach($m->elements as $field) {
+            // ignore not persisted model fields
             if (!$field instanceof \atk4\data\Field) {
                 continue;
             }
@@ -59,7 +77,74 @@ class Migration extends Expression
 
             $this->field($field->actual ?: $field->short_name);  // todo add options here
         }
+
+        return $m;
     }
+
+    /**
+     * Set SQL expression template.
+     *
+     * @param string $mode Template name
+     *
+     * @return $this
+     */
+    protected function mode($mode)
+    {
+        if (!isset($this->templates[$mode])) {
+            throw new Exception(['Structure builder does not have this mode', 'mode' => $mode]);
+        }
+
+        $this->mode = $mode;
+        $this->template = $this->templates[$mode];
+
+        return $this;
+    }
+
+    /**
+     * Create new table.
+     *
+     * @return $this
+     */
+    public function create()
+    {
+        $this->mode('create')->execute();
+
+        return $this;
+    }
+
+    /**
+     * Drop table.
+     *
+     * @return $this
+     */
+    public function drop()
+    {
+        $this->mode('drop')->execute();
+
+        return $this;
+    }
+
+    /**
+     * Alter table.
+     *
+     * @return $this
+     */
+    public function alter()
+    {
+        $this->mode('alter')->execute();
+
+        return $this;
+    }
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Will read current schema and consult current 'field' arguments, to see if they are matched.
@@ -71,11 +156,11 @@ class Migration extends Expression
 
         // We use this to read fields from SQL
         $migration2 = new self($this->connection);
-        
+
         try {
             $migration2->loadFromTable($this->table);
         } catch (Exception $e) {
-            // should probably use custom exception clas shere
+            // should probably use custom exception class here
             return $this->create();
         }
 
@@ -145,6 +230,14 @@ class Migration extends Expression
         return $this;
     }
 
+    /**
+     * Add field in template.
+     *
+     * @param string $name
+     * @param array  $options
+     *
+     * @return $this
+     */
     public function field($name, $options = [])
     {
         // save field in args
@@ -153,6 +246,13 @@ class Migration extends Expression
         return $this;
     }
 
+    /**
+     * Add ID field in template.
+     *
+     * @param string $name
+     *
+     * @return $this
+     */
     public function id($name = null)
     {
         if (!$name) {
@@ -167,6 +267,11 @@ class Migration extends Expression
         return $this;
     }
 
+    /**
+     * Render "field" template.
+     *
+     * @return string
+     */
     public function _render_field()
     {
         $ret = [];
@@ -196,32 +301,6 @@ class Migration extends Expression
         }
 
         return implode(',', $ret);
-    }
-
-    public function mode($mode)
-    {
-        if (!isset($this->templates[$mode])) {
-            throw new Exception(['Structure builder does not have this mode', 'mode' => $mode]);
-        }
-
-        $this->mode = $mode;
-        $this->template = $this->templates[$mode];
-
-        return $this;
-    }
-
-    public function drop()
-    {
-        $this->mode('drop')->execute();
-
-        return $this;
-    }
-
-    public function create()
-    {
-        $this->mode('create')->execute();
-
-        return $this;
     }
 
     /**
