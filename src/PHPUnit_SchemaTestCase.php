@@ -29,7 +29,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 
         // create databases
         foreach ($db_data as $table => $data) {
-            $s = new Migration(['connection' => $this->db->connection]);
+            $s = new Migration($this->db->connection);
             $s->table($table)->drop();
 
             $first_row = current($data);
