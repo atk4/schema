@@ -41,6 +41,7 @@ class Migration extends Expression
                 $this->connection = $source->persistence->connection;
 
                 $this->setModel($source);
+                return;
             }
         }
 
@@ -75,6 +76,11 @@ class Migration extends Expression
                 continue;
             }
 
+            if ($field->short_name == $m->id_field) {
+                $this->id($field->actual ?: $field->short_name);
+                continue;
+            }
+
             $this->field($field->actual ?: $field->short_name);  // todo add options here
         }
 
@@ -88,7 +94,7 @@ class Migration extends Expression
      *
      * @return $this
      */
-    protected function mode($mode)
+    public function mode($mode)
     {
         if (!isset($this->templates[$mode])) {
             throw new Exception(['Structure builder does not have this mode', 'mode' => $mode]);
@@ -149,7 +155,7 @@ class Migration extends Expression
     /**
      * Will read current schema and consult current 'field' arguments, to see if they are matched.
      * If table does not exist, will invoke ->create. If table does exist, then it will execute
-     * methods ->addField(), ->removeField()  or ->updateField() as needed, then call ->alter()
+     * methods ->addField(), ->dropField()  or ->updateField() as needed, then call ->alter()
      */
     public function migrate()
     {
@@ -158,20 +164,23 @@ class Migration extends Expression
         $migration2 = new self($this->connection);
 
         try {
-            $migration2->loadFromTable($this->table);
+            $migration2->importTable($this['table']);
         } catch (Exception $e) {
             // should probably use custom exception class here
             return $this->create();
         }
 
-        foreach ($this->args['field'] as $field => $options) {
-            if (isset($migration2->args['field'][$field])) {
-                // field already exist. Lets compare options
+        $old = $migration2->_getFields();
+        $new = $this->_getFields();
+
+        foreach ($new as $field => $options) {
+            if ($field == 'id')continue;
 
 
+            if (isset($old[$field])) {
                 // todo - compare options and if needed, call
-                // $this->alterField($field, $options);
-                unset($migration2->args['field'][$field]);
+                $this->alterField($field, $options);
+                unset($old[$field]);
             } else {
                 // new field, so
                 $this->newField($field, $options);
@@ -179,11 +188,31 @@ class Migration extends Expression
         }
 
         // remaining fields
-        foreach ($migration2->args['field'] as $field => $options) {
-            $this->removeField($args['field']);
+        foreach ($old as $field => $options) {
+            if ($field == 'id')continue;
+            $this->dropField($field);
         }
 
         return $this->alter();
+    }
+
+    public function _render_statements()
+    {
+        $result = [];
+
+        if (isset($this->args['dropField'])) foreach($this->args['dropField'] as $field => $junk) {
+            $result[] = 'drop '. $this->_escape($field);
+        }
+
+        if (isset($this->args['addField'])) foreach($this->args['addField'] as $field => $option) {
+            $result[] = 'add '. $this->_render_one_field($field, $option);
+        }
+
+        if (isset($this->args['alterField'])) foreach($this->args['alterField'] as $field => $option) {
+            $result[] = 'update '. $this->_escape($field). ' '. $this->_render_one_field($field, $option);
+        }
+
+        return join(', ', $result);
     }
 
 
@@ -213,14 +242,38 @@ class Migration extends Expression
 
     public function newField($field, $options = [])
     {
+        $this->_set_args('newField', $field, $options);
     }
 
+    /**
+     * cannot rename fields
+     */
     public function alterField($field, $options = [])
     {
+        $this->_set_args('alterField', $field, $options);
     }
 
-    public function removeField($field, $options = [])
+    public function dropField($field)
     {
+        $this->_set_args('dropField', $field, true);
+    }
+
+    public function importTable($table)
+    {
+        $this->table($table);
+        foreach($this->connection->expr('pragma table_info({})', [$table]) as $row) {
+            if ($row['pk']) {
+                $this->id($row['name']);
+                continue;
+            }
+
+            $type = $row['type'];
+            if (substr($type, 0,7) == 'varchar') {
+                $type = null;
+            }
+
+            $this->field($row['name'], ['type'=>$type]);
+        }
     }
 
     public function table($table)
@@ -288,6 +341,14 @@ class Migration extends Expression
                 continue;
             }
 
+            $ret[] = $this->_render_one_field($field, $options);
+        }
+
+        return implode(',', $ret);
+    }
+
+    protected function _render_one_field($field, $options)
+    {
             $type = strtolower(isset($options['type']) ?
                 $options['type'] : 'varchar');
             $type = preg_replace('/[^a-z0-9]+/', '', $type);
@@ -296,11 +357,13 @@ class Migration extends Expression
                 $options['len'] :
                 ($type === 'varchar' ? 255 : null);
 
-            $ret[] = $this->_escape($field).' '.$type.
+            return $this->_escape($field).' '.$type.
                 ($len ? ('('.$len.')') : '');
-        }
+    }
 
-        return implode(',', $ret);
+    public function _getFields()
+    {
+        return $this->args['field'];
     }
 
     /**
