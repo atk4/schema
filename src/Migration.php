@@ -5,7 +5,7 @@ namespace atk4\schema;
 use atk4\core\Exception;
 use atk4\dsql\Expression;
 
-class Migration extends Expression
+abstract class Migration extends Expression
 {
     /** @var string Expression mode. See $templates. */
     public $mode = 'create';
@@ -19,6 +19,8 @@ class Migration extends Expression
 
     /** @var \atk4\dsql\Connection Database connection */
     public $connection;
+
+    public $primary_key_expr = 'integer primary key autoincrement';
 
     /**
      * Create new migration.
@@ -155,17 +157,15 @@ class Migration extends Expression
     /**
      * Will read current schema and consult current 'field' arguments, to see if they are matched.
      * If table does not exist, will invoke ->create. If table does exist, then it will execute
-     * methods ->addField(), ->dropField()  or ->updateField() as needed, then call ->alter()
+     * methods ->addColumn(), ->dropColumn()  or ->updateColumn() as needed, then call ->alter()
      */
     public function migrate()
     {
 
         // We use this to read fields from SQL
-        $migration2 = new self($this->connection);
+        $migration2 = new static($this->connection);
 
-        try {
-            $migration2->importTable($this['table']);
-        } catch (Exception $e) {
+        if (!$migration2->importTable($this['table'])) {
             // should probably use custom exception class here
             return $this->create();
         }
@@ -200,16 +200,16 @@ class Migration extends Expression
     {
         $result = [];
 
-        if (isset($this->args['dropField'])) foreach($this->args['dropField'] as $field => $junk) {
-            $result[] = 'drop '. $this->_escape($field);
+        if (isset($this->args['dropColumn'])) foreach($this->args['dropColumn'] as $field => $junk) {
+            $result[] = 'drop column '. $this->_escape($field);
         }
 
-        if (isset($this->args['addField'])) foreach($this->args['addField'] as $field => $option) {
-            $result[] = 'add '. $this->_render_one_field($field, $option);
+        if (isset($this->args['addColumn'])) foreach($this->args['addColumn'] as $field => $option) {
+            $result[] = 'add column '. $this->_render_one_field($field, $option);
         }
 
-        if (isset($this->args['alterField'])) foreach($this->args['alterField'] as $field => $option) {
-            $result[] = 'update '. $this->_escape($field). ' '. $this->_render_one_field($field, $option);
+        if (isset($this->args['alterColumn'])) foreach($this->args['alterColumn'] as $field => $option) {
+            $result[] = 'alter column '. $this->_escape($field). ' '. $this->_render_one_field($field, $option);
         }
 
         return join(', ', $result);
@@ -258,10 +258,15 @@ class Migration extends Expression
         $this->_set_args('dropField', $field, true);
     }
 
+    abstract public function describeTable($table);
+        // $this->connection->expr('pragma table_info({})', [$table])
+
     public function importTable($table)
     {
         $this->table($table);
-        foreach($this->connection->expr('pragma table_info({})', [$table]) as $row) {
+        $has_fields = false;
+        foreach($this->describeTable($table) as $row) {
+            $has_fields = true;
             if ($row['pk']) {
                 $this->id($row['name']);
                 continue;
@@ -274,6 +279,8 @@ class Migration extends Expression
 
             $this->field($row['name'], ['type'=>$type]);
         }
+
+        return $has_fields;
     }
 
     public function table($table)
@@ -312,7 +319,7 @@ class Migration extends Expression
             $name = 'id';
         }
 
-        $val = $this->expr('integer primary key autoincrement');
+        $val = $this->expr($this->primary_key_expr);
 
         $this->args['field'] =
             [$name => $val] + (isset($this->args['field']) ? $this->args['field'] : []);

@@ -4,10 +4,8 @@ namespace atk4\schema\tests;
 
 use \atk4\schema\Migration;
 
-class ModelTest extends \atk4\core\PHPUnit_SQLTestCase
+class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
 {
-    public $debug = true;
-
     public function testSetModelCreate()
     {
         $user = new Testuser($this->db);
