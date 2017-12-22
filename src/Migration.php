@@ -5,7 +5,7 @@ namespace atk4\schema;
 use atk4\core\Exception;
 use atk4\dsql\Expression;
 
-abstract class Migration extends Expression
+class Migration extends Expression
 {
     /** @var string Expression mode. See $templates. */
     public $mode = 'create';
@@ -161,6 +161,7 @@ abstract class Migration extends Expression
      */
     public function migrate()
     {
+        $changes = 0;
 
         // We use this to read fields from SQL
         $migration2 = new static($this->connection);
@@ -179,37 +180,40 @@ abstract class Migration extends Expression
 
             if (isset($old[$field])) {
                 // todo - compare options and if needed, call
-                $this->alterField($field, $options);
+                //$this->alterField($field, $options);
                 unset($old[$field]);
             } else {
                 // new field, so
                 $this->newField($field, $options);
+                $changes++;
             }
         }
 
         // remaining fields
         foreach ($old as $field => $options) {
             if ($field == 'id')continue;
-            $this->dropField($field);
+            //$this->dropField($field);
         }
 
-        return $this->alter();
+        if($changes) {
+            return $this->alter();
+        }
     }
 
     public function _render_statements()
     {
         $result = [];
 
-        if (isset($this->args['dropColumn'])) foreach($this->args['dropColumn'] as $field => $junk) {
+        if (isset($this->args['dropField'])) foreach($this->args['dropField'] as $field => $junk) {
             $result[] = 'drop column '. $this->_escape($field);
         }
 
-        if (isset($this->args['addColumn'])) foreach($this->args['addColumn'] as $field => $option) {
+        if (isset($this->args['newField'])) foreach($this->args['newField'] as $field => $option) {
             $result[] = 'add column '. $this->_render_one_field($field, $option);
         }
 
-        if (isset($this->args['alterColumn'])) foreach($this->args['alterColumn'] as $field => $option) {
-            $result[] = 'alter column '. $this->_escape($field). ' '. $this->_render_one_field($field, $option);
+        if (isset($this->args['alterField'])) foreach($this->args['alterField'] as $field => $option) {
+            $result[] = 'change column '. $this->_escape($field). ' '. $this->_render_one_field($field, $option);
         }
 
         return join(', ', $result);
@@ -243,6 +247,7 @@ abstract class Migration extends Expression
     public function newField($field, $options = [])
     {
         $this->_set_args('newField', $field, $options);
+        return $this;
     }
 
     /**
@@ -251,15 +256,20 @@ abstract class Migration extends Expression
     public function alterField($field, $options = [])
     {
         $this->_set_args('alterField', $field, $options);
+        return $this;
     }
 
     public function dropField($field)
     {
         $this->_set_args('dropField', $field, true);
+        return $this;
     }
 
-    abstract public function describeTable($table);
-        // $this->connection->expr('pragma table_info({})', [$table])
+
+    // TODO: add abstract
+    public function describeTable($table) {
+        return $this->connection->expr('pragma table_info({})', [$table])->get();
+    }
 
     public function importTable($table)
     {
@@ -275,6 +285,10 @@ abstract class Migration extends Expression
             $type = $row['type'];
             if (substr($type, 0,7) == 'varchar') {
                 $type = null;
+            }
+
+            if ($type == 'int') {
+                $type = 'integer';
             }
 
             $this->field($row['name'], ['type'=>$type]);

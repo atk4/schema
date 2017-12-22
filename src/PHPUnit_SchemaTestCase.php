@@ -2,7 +2,7 @@
 
 namespace atk4\schema;
 
-use atk4\data\Persistence_SQL;
+use atk4\data\Persistence;
 use atk4\dsql\Query;
 
 class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
@@ -13,11 +13,39 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 
     public $debug = false;
 
+    public $mode = 'sqlite';
+
     public function setUp()
     {
         parent::setUp();
         // establish connection
-        $this->db = new Persistence_SQL(($this->debug ? ('dumper:') : '').'sqlite::memory:');
+        $dsn = getenv('DSN');
+        if ($dsn) {
+            $this->db = Persistence::connect(($this->debug ? ('dumper:') : '').$dsn);
+            list($this->mode, $junk) = explode(':', $dsn, 2);
+        } else {
+            $this->db = Persistence::connect(($this->debug ? ('dumper:') : '').'sqlite::memory:');
+        }
+    }
+
+    public function getMigration($m = null)
+    {
+        if ($this->mode == 'sqlite') {
+            return new \atk4\schema\Migration\SQLite($m ?: $this->db);
+        } elseif ($this->mode == 'mysql') {
+            return new \atk4\schema\Migration\MySQL($m ?: $this->db);
+        } else {
+            throw new \atk4\core\Exception(['Not sure which migration class to use for your DSN', 'mode'=>$this->mode, 'dsn'=>getenv('DSN')]);
+        }
+    }
+
+    /**
+     * Use this method to clean up tables after you have created them,
+     * so that your database would be ready for the next test
+     */
+    public function dropTable($table)
+    {
+        $this->db->connection->expr("drop table if exists {}", [$table])->execute();
     }
 
     /**
@@ -29,7 +57,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 
         // create databases
         foreach ($db_data as $table => $data) {
-            $s = new Migration($this->db->connection);
+            $s = $this->getMigration();
             $s->table($table)->drop();
 
             $first_row = current($data);
