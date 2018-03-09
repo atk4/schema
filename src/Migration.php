@@ -224,14 +224,17 @@ class Migration extends Expression
      * Create rough model from current set of $this->args['fields']. This is not
      * ideal solution but is designed as a drop-in solution.
      */
-    public function createModel(\atk4\data\Persintence $persistence, $table = null)
+    public function createModel($persistence, $table = null)
     {
-        $m = new \atk4\data\Model($persistence);
-        if ($table) {
-            $m->table = $table;
-        }
+        $m = new \atk4\data\Model([$persistence, 'table'=>$table ?: $this['table'] = $table]);
 
-        foreach ($this->args['field'] as $field => $options) {
+        foreach ($this->_getFields() as $field => $options) {
+
+            if($field=='id')continue;
+
+            if(is_object($options)) {
+                continue;
+            }
 
             $defaults = [];
 
@@ -287,8 +290,31 @@ class Migration extends Expression
                 $type = null;
             }
 
+            if (substr($type, 0,4) == 'char') {
+                $type = null;
+            }
+            if (substr($type, 0,4) == 'enum') {
+                $type = null;
+            }
+
             if ($type == 'int') {
                 $type = 'integer';
+            }
+
+            if ($type == 'decimal') {
+                $type = 'integer';
+            }
+
+            if ($type == 'tinyint') {
+                $type = 'boolean';
+            }
+
+            if ($type == 'longtext') {
+                $type = 'text';
+            }
+
+            if ($type == 'longblob') {
+                $type = 'text';
             }
 
             $this->field($row['name'], ['type'=>$type]);
