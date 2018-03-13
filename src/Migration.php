@@ -4,8 +4,9 @@ namespace atk4\schema;
 
 use atk4\core\Exception;
 use atk4\dsql\Expression;
+use atk4\dsql\Expression_MySQL;
 
-class Migration extends Expression
+class Migration extends Expression_MySQL
 {
     /** @var string Expression mode. See $templates. */
     public $mode = 'create';
@@ -163,12 +164,17 @@ class Migration extends Expression
     {
         $changes = 0;
 
+        $added = 0;
+        $altered = 0;
+        $dropped = 0;
+
         // We use this to read fields from SQL
         $migration2 = new static($this->connection);
 
         if (!$migration2->importTable($this['table'])) {
             // should probably use custom exception class here
-            return $this->create();
+            $this->create();
+            return 'created new table';
         }
 
         $old = $migration2->_getFields();
@@ -185,6 +191,7 @@ class Migration extends Expression
             } else {
                 // new field, so
                 $this->newField($field, $options);
+                $added++;
                 $changes++;
             }
         }
@@ -196,8 +203,11 @@ class Migration extends Expression
         }
 
         if($changes) {
-            return $this->alter();
+            $this->alter();
+            return 'added '.$added.' field'.($added%10==1?'':'s').' and changed '.$altered;
         }
+
+        return 'no changes';
     }
 
     public function _render_statements()
