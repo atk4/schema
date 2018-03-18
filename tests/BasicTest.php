@@ -2,13 +2,34 @@
 
 namespace atk4\ui\tests;
 
-class BasicTest extends \atk4\core\PHPUnit_AgileTestCase //class BasicTest extends \atk4\core\PHPUnit_AgileTestCase
+use \atk4\schema\Migration\SQLite as Migration;
+
+class BasicTest extends \atk4\schema\PHPUnit_SchemaTestCase
 {
     /**
      * Test constructor.
      */
-    public function testTesting()
+    public function testCreateAndAlter()
     {
-        $this->assertEquals('foo', 'foo');
+        $this->dropTable('user');
+        $m = $this->getMigration();
+        $m->table('user')->id()->field('foo')->field('bar', ['type'=>'integer'])->field('baz', ['type'=>'text'])->create();
+
+        $m = $this->getMigration();
+        $m->table('user')->newField('zed', ['type'=>'integer'])->alter();
+    }
+
+    public function testCreateAndDrop()
+    {
+        if ($this->mode == 'sqlite') {
+            $this->markTestSkipped('SQLite does not support drop');
+        }
+
+        $this->dropTable('user');
+        $m = $this->getMigration();
+        $m->table('user')->id()->field('foo')->field('bar', ['type'=>'integer'])->field('baz', ['type'=>'text'])->create();
+
+        $m = $this->getMigration();
+        $m->table('user')->dropField('bar', ['type'=>'integer'])->alter();
     }
 }
