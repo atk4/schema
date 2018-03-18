@@ -19,6 +19,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         parent::setUp();
         // establish connection
         $dsn = getenv('DSN');
+        var_Dump($dsn);
         if ($dsn) {
             $this->db = Persistence::connect(($this->debug ? ('dumper:') : '').$dsn);
             list($this->mode, $junk) = explode(':', $dsn, 2);
@@ -84,7 +85,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
             $has_id = (bool) key($data);
 
             foreach ($data as $id => $row) {
-                $s = $this->db->dsql(); //(['connection' => $this->db->connection]);
+                $s = $this->db->dsql();
                 if ($id === '_') {
                     continue;
                 }
