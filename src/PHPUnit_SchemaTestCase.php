@@ -19,7 +19,6 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         parent::setUp();
         // establish connection
         $dsn = getenv('DSN');
-        var_Dump($dsn);
         if ($dsn) {
             $this->db = Persistence::connect(($this->debug ? ('dumper:') : '').$dsn);
             list($this->mode, $junk) = explode(':', $dsn, 2);
