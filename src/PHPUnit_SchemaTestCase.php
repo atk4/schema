@@ -3,7 +3,6 @@
 namespace atk4\schema;
 
 use atk4\data\Persistence;
-use atk4\dsql\Query;
 
 class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 {
@@ -85,7 +84,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
             $has_id = (bool) key($data);
 
             foreach ($data as $id => $row) {
-                $s = new Query(['connection' => $this->db->connection]);
+                $s = $this->db->dsql(); //(['connection' => $this->db->connection]);
                 if ($id === '_') {
                     continue;
                 }
@@ -118,7 +117,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         foreach ($tables as $table) {
             $data2 = [];
 
-            $s = new Query(['connection' => $this->db->connection]);
+            $s = $this->db->dsql();
             $data = $s->table($table)->get();
 
             foreach ($data as &$row) {
