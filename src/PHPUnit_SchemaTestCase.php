@@ -97,6 +97,12 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
                 if (is_int($row)) {
                     $s->field($field, ['type' => 'integer']);
                     continue;
+                } elseif (is_float($row)) {
+                    $s->field($field, ['type' => 'numeric(10,5)']);
+                    continue;
+                } elseif ($row instanceof \DateTime) {
+                    $s->field($field, ['type' => 'datetime']);
+                    continue;
                 }
 
                 $s->field($field);
