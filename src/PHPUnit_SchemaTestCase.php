@@ -26,6 +26,16 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         parent::setUp();
 
         // establish connection
+        /*
+        if ($GLOBALS['DB_DSN'] == 'sqlite::memory:') {
+            $this->testQueries = true;
+        }
+        $this->db = new Persistence_SQL(($this->debug ? ('dumper:') : '').$GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD']);
+        $this->isPostgresql = ('pgsql' == $this->db->connection->connection()->getAttribute(\PDO::ATTR_DRIVER_NAME));
+        $this->isMysql = ('mysql' == $this->db->connection->connection()->getAttribute(\PDO::ATTR_DRIVER_NAME));
+        */
+
+        // establish connection
         $dsn = getenv('DSN');
         if ($dsn) {
             $this->db = Persistence::connect(($this->debug ? ('dumper:') : '').$dsn);
@@ -50,6 +60,10 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
                 return new \atk4\schema\Migration\SQLite($m ?: $this->db);
             case 'mysql':
                 return new \atk4\schema\Migration\MySQL($m ?: $this->db);
+            //case 'pgsql':
+            //    return new \atk4\schema\Migration\PgSQL($m ?: $this->db);
+            //case 'oci':
+            //    return new \atk4\schema\Migration\Oracle($m ?: $this->db);
             default:
                 throw new \atk4\core\Exception([
                     'Not sure which migration class to use for your DSN',
