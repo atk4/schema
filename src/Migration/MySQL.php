@@ -4,8 +4,17 @@ namespace atk4\schema\Migration;
 
 class MySQL extends \atk4\schema\Migration
 {
+    /** @var string Expression to create primary key */
     public $primary_key_expr = 'integer primary key auto_increment';
 
+    /**
+     * Return database table descriptions.
+     * DB engine specific.
+     *
+     * @param string $table
+     *
+     * @return array
+     */
     public function describeTable($table) {
         if (!$this->connection->expr('show tables like []', [$table])->get()) {
             return []; // no such table

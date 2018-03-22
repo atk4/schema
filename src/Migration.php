@@ -21,6 +21,7 @@ class Migration extends Expression_MySQL
     /** @var \atk4\dsql\Connection Database connection */
     public $connection;
 
+    /** @var string Expression to create primary key */
     public $primary_key_expr = 'integer primary key autoincrement';
 
     /**
@@ -50,7 +51,7 @@ class Migration extends Expression_MySQL
 
         throw new \atk4\core\Exception([
             'Source is specified incorrectly. Must be Connection, Persistence or initialized Model',
-            'source'=>$source
+            'source' => $source,
         ]);
     }
 
@@ -159,14 +160,12 @@ class Migration extends Expression_MySQL
      * Will read current schema and consult current 'field' arguments, to see if they are matched.
      * If table does not exist, will invoke ->create. If table does exist, then it will execute
      * methods ->addColumn(), ->dropColumn()  or ->updateColumn() as needed, then call ->alter()
+     *
+     * @return string Returns short textual info for logging purposes
      */
     public function migrate()
     {
-        $changes = 0;
-
-        $added = 0;
-        $altered = 0;
-        $dropped = 0;
+        $changes = $added = $altered = $dropped = 0;
 
         // We use this to read fields from SQL
         $migration2 = new static($this->connection);
@@ -181,8 +180,9 @@ class Migration extends Expression_MySQL
         $new = $this->_getFields();
 
         foreach ($new as $field => $options) {
-            if ($field == 'id')continue;
-
+            if ($field == 'id') {
+                continue;
+            }
 
             if (isset($old[$field])) {
                 // todo - compare options and if needed, call
@@ -198,7 +198,9 @@ class Migration extends Expression_MySQL
 
         // remaining fields
         foreach ($old as $field => $options) {
-            if ($field == 'id')continue;
+            if ($field == 'id') {
+                continue;
+            }
             //$this->dropField($field);
         }
 
@@ -210,20 +212,31 @@ class Migration extends Expression_MySQL
         return 'no changes';
     }
 
+    /**
+     * Renders statement.
+     *
+     * @return string
+     */
     public function _render_statements()
     {
         $result = [];
 
-        if (isset($this->args['dropField'])) foreach($this->args['dropField'] as $field => $junk) {
-            $result[] = 'drop column '. $this->_escape($field);
+        if (isset($this->args['dropField'])) {
+            foreach($this->args['dropField'] as $field => $junk) {
+                $result[] = 'drop column '. $this->_escape($field);
+            }
         }
 
-        if (isset($this->args['newField'])) foreach($this->args['newField'] as $field => $option) {
-            $result[] = 'add column '. $this->_render_one_field($field, $option);
+        if (isset($this->args['newField'])) {
+            foreach($this->args['newField'] as $field => $option) {
+                $result[] = 'add column '. $this->_render_one_field($field, $option);
+            }
         }
 
-        if (isset($this->args['alterField'])) foreach($this->args['alterField'] as $field => $option) {
-            $result[] = 'change column '. $this->_escape($field). ' '. $this->_render_one_field($field, $option);
+        if (isset($this->args['alterField'])) {
+            foreach($this->args['alterField'] as $field => $option) {
+                $result[] = 'change column '. $this->_escape($field). ' '. $this->_render_one_field($field, $option);
+            }
         }
 
         return join(', ', $result);
@@ -233,6 +246,11 @@ class Migration extends Expression_MySQL
     /**
      * Create rough model from current set of $this->args['fields']. This is not
      * ideal solution but is designed as a drop-in solution.
+     *
+     * @param \atk4\data\Persistence $persistence
+     * @param string                 $table
+     *
+     * @return \atk4\data\Model
      */
     public function createModel($persistence, $table = null)
     {
@@ -257,14 +275,30 @@ class Migration extends Expression_MySQL
         return $m;
     }
 
+    /**
+     * Sets newField argument.
+     *
+     * @param string $field
+     * @param array  $options
+     *
+     * @return $this
+     */
     public function newField($field, $options = [])
     {
         $this->_set_args('newField', $field, $options);
+
         return $this;
     }
 
     /**
-     * cannot rename fields
+     * Sets alterField argument.
+     *
+     * Note: can not rename fields
+     *
+     * @param string $field
+     * @param array  $options
+     *
+     * @return $this
      */
     public function alterField($field, $options = [])
     {
@@ -272,18 +306,42 @@ class Migration extends Expression_MySQL
         return $this;
     }
 
+    /**
+     * Sets dropField argument.
+     *
+     * @param string $field
+     *
+     * @return $this
+     */
     public function dropField($field)
     {
         $this->_set_args('dropField', $field, true);
+
         return $this;
     }
 
 
-    // TODO: add abstract
+    /**
+     * Return database table descriptions.
+     * DB engine specific.
+     *
+     * @todo Convert to abstract function
+     *
+     * @param string $table
+     *
+     * @return array
+     */
     public function describeTable($table) {
         return $this->connection->expr('pragma table_info({})', [$table])->get();
     }
 
+    /**
+     * Import fields from database into migration field config.
+     *
+     * @param string $table
+     *
+     * @return bool
+     */
     public function importTable($table)
     {
         $this->table($table);
@@ -333,6 +391,13 @@ class Migration extends Expression_MySQL
         return $has_fields;
     }
 
+    /**
+     * Sets table.
+     *
+     * @param string $table
+     *
+     * @return $this
+     */
     public function table($table)
     {
         $this['table'] = $table;
@@ -404,6 +469,14 @@ class Migration extends Expression_MySQL
         return implode(',', $ret);
     }
 
+    /**
+     * Renders one field.
+     *
+     * @param string $field
+     * @param array  $options
+     *
+     * @return string
+     */
     protected function _render_one_field($field, $options)
     {
             $type = strtolower(isset($options['type']) ?
@@ -418,6 +491,11 @@ class Migration extends Expression_MySQL
                 ($len ? ('('.$len.')') : '');
     }
 
+    /**
+     * Return fields.
+     *
+     * @return array
+     */
     public function _getFields()
     {
         return $this->args['field'];

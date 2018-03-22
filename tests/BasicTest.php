@@ -13,23 +13,38 @@ class BasicTest extends \atk4\schema\PHPUnit_SchemaTestCase
     {
         $this->dropTable('user');
         $m = $this->getMigration();
-        $m->table('user')->id()->field('foo')->field('bar', ['type'=>'integer'])->field('baz', ['type'=>'text'])->create();
+        $m->table('user')->id()
+            ->field('foo')
+            ->field('bar', ['type'=>'integer'])
+            ->field('baz', ['type'=>'text'])
+            ->create();
 
         $m = $this->getMigration();
-        $m->table('user')->newField('zed', ['type'=>'integer'])->alter();
+        $m->table('user')
+            ->newField('zed', ['type'=>'integer'])
+            ->alter();
     }
 
+    /**
+     * Tests creating and dropping of tables.
+     */
     public function testCreateAndDrop()
     {
-        if ($this->mode == 'sqlite') {
+        if ($this->driver == 'sqlite') {
             $this->markTestSkipped('SQLite does not support drop');
         }
 
         $this->dropTable('user');
         $m = $this->getMigration();
-        $m->table('user')->id()->field('foo')->field('bar', ['type'=>'integer'])->field('baz', ['type'=>'text'])->create();
+        $m->table('user')->id()
+            ->field('foo')
+            ->field('bar', ['type'=>'integer'])
+            ->field('baz', ['type'=>'text'])
+            ->create();
 
         $m = $this->getMigration();
-        $m->table('user')->dropField('bar', ['type'=>'integer'])->alter();
+        $m->table('user')
+            ->dropField('bar', ['type'=>'integer'])
+            ->alter();
     }
 }

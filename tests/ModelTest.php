@@ -21,9 +21,20 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
     public function testImportTable()
     {
         $this->dropTable('user');
+
         $m = $this->getMigration();
-        $m->table('user')->id()->field('foo')->field('bar', ['type'=>'integer'])->field('baz', ['type'=>'text'])->create();
-        $this->db->dsql()->table('user')->set('id', 1)->set('foo', 'foovalue')->set('bar', 123)->set('baz','long text value')->insert();
+        $m->table('user')->id()
+            ->field('foo')
+            ->field('bar', ['type'=>'integer'])
+            ->field('baz', ['type'=>'text'])
+            ->create();
+        $this->db->dsql()->table('user')
+            ->set([
+                'id' => 1,
+                'foo' => 'foovalue',
+                'bar' => 123,
+                'baz' => 'long text value',
+            ])->insert();
 
         $m2 = $this->getMigration();
         $m2->importTable('user');
@@ -36,18 +47,32 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
     {
         $this->dropTable('user');
         $m = $this->getMigration($this->db);
-        $m->table('user')->id()->field('foo')->field('bar', ['type'=>'integer'])->field('baz', ['type'=>'text'])->create();
-        $this->db->dsql()->table('user')->set('id', 1)->set('foo', 'foovalue')->set('bar', 123)->set('baz','long text value')->insert();
+        $m->table('user')->id()
+            ->field('foo')
+            ->field('bar', ['type'=>'integer'])
+            ->field('baz', ['type'=>'text'])
+            ->create();
+        $this->db->dsql()->table('user')
+            ->set([
+                'id' => 1,
+                'foo' => 'foovalue',
+                'bar' => 123,
+                'baz' => 'long text value',
+            ])->insert();
 
         $m2 = $this->getMigration($this->db);
-        $m2->table('user')->id()->field('xx')->field('bar', ['type'=>'integer'])->field('baz')->migrate();
+        $m2->table('user')->id()
+            ->field('xx')
+            ->field('bar', ['type'=>'integer'])
+            ->field('baz')
+            ->migrate();
     }
 }
 
 class TestUser extends \atk4\data\Model {
     public $table = 'user';
 
-    function init() {
+    public function init() {
         parent::init();
 
         $this->addField('name');
