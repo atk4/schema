@@ -6,41 +6,64 @@ use atk4\data\Persistence;
 
 class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 {
+    /** @var \atk4\data\Persistence Persistence instance */
     public $db;
 
+    /** @var array Array of database table names */
     public $tables = null;
 
+    /** @var bool Debug mode enabled/disabled. In debug mode will use Dumper persistence */
     public $debug = false;
 
-    public $mode = 'sqlite';
+    /** @var string What DB driver we use - mysql, sqlite, pgsql etc */
+    public $driver = 'sqlite';
 
+    /**
+     * Setup test database.
+     */
     public function setUp()
     {
         parent::setUp();
+
         // establish connection
         $dsn = getenv('DSN');
         if ($dsn) {
             $this->db = Persistence::connect(($this->debug ? ('dumper:') : '').$dsn);
-            list($this->mode, $junk) = explode(':', $dsn, 2);
+            list($this->driver, $junk) = explode(':', $dsn, 2);
+            $this->driver = strtolower($this->driver);
         } else {
             $this->db = Persistence::connect(($this->debug ? ('dumper:') : '').'sqlite::memory:');
         }
     }
 
+    /**
+     * Create and return appropriate Migration object.
+     *
+     * @param \atk4\dsql\Connection|\atk4\data\Persistence|\atk4\data\Model $m
+     *
+     * @return Migration
+     */
     public function getMigration($m = null)
     {
-        if ($this->mode == 'sqlite') {
-            return new \atk4\schema\Migration\SQLite($m ?: $this->db);
-        } elseif ($this->mode == 'mysql') {
-            return new \atk4\schema\Migration\MySQL($m ?: $this->db);
-        } else {
-            throw new \atk4\core\Exception(['Not sure which migration class to use for your DSN', 'mode'=>$this->mode, 'dsn'=>getenv('DSN')]);
+        switch ($this->driver) {
+            case 'sqlite':
+                return new \atk4\schema\Migration\SQLite($m ?: $this->db);
+            case 'mysql':
+                return new \atk4\schema\Migration\MySQL($m ?: $this->db);
+            default:
+                throw new \atk4\core\Exception([
+                    'Not sure which migration class to use for your DSN',
+                    'driver' => $this->driver,
+                    'dsn' => getenv('DSN'),
+                ]);
         }
     }
 
     /**
      * Use this method to clean up tables after you have created them,
-     * so that your database would be ready for the next test
+     * so that your database would be ready for the next test.
+     *
+     * @param string $table Table name
      */
     public function dropTable($table)
     {
@@ -49,18 +72,22 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 
     /**
      * Sets database into a specific test.
+     *
+     * @param array $db_data
      */
     public function setDB($db_data)
     {
         $this->tables = array_keys($db_data);
 
-        // create databases
+        // create tables
         foreach ($db_data as $table => $data) {
             $s = $this->getMigration();
+
+            // drop table
             $s->table($table)->drop();
 
+            // create table and fields from first row of data
             $first_row = current($data);
-
             foreach ($first_row as $field => $row) {
                 if ($field === 'id') {
                     $s->id('id');
@@ -81,6 +108,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 
             $s->create();
 
+            // import data
             $has_id = (bool) key($data);
 
             foreach ($data as $id => $row) {
@@ -101,12 +129,19 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         }
     }
 
-    public function getDB($tables = null, $noid = false)
+    /**
+     * Return database data.
+     *
+     * @param array $tables Array of tables
+     * @param bool  $no_id
+     *
+     * @return array
+     */
+    public function getDB($tables = null, $no_id = false)
     {
         if (!$tables) {
             $tables = $this->tables;
         }
-
 
         if (is_string($tables)) {
             $tables = array_map('trim', explode(',', $tables));
@@ -127,7 +162,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
                     }
                 }
 
-                if ($noid) {
+                if ($no_id) {
                     unset($row['id']);
                     $data2[] = $row;
                 } else {
@@ -141,6 +176,11 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         return $ret;
     }
 
+    /**
+     * Runs the bare test sequence.
+     *
+     * @return null
+     */
     public function runBare()
     {
         try {
@@ -150,6 +190,15 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         }
     }
 
+    /**
+     * Calls protected method.
+     *
+     * @param object $obj
+     * @param string $name
+     * @param array  $args
+     *
+     * @return mixed
+     */
     public function callProtected($obj, $name, array $args = [])
     {
         $class = new \ReflectionClass($obj);
@@ -159,6 +208,14 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         return $method->invokeArgs($obj, $args);
     }
 
+    /**
+     * Returns protected property value.
+     *
+     * @param object $obj
+     * @param string $name
+     *
+     * @return mixed
+     */
     public function getProtected($obj, $name)
     {
         $class = new \ReflectionClass($obj);
