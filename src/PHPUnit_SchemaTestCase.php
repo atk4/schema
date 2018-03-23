@@ -26,16 +26,6 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         parent::setUp();
 
         // establish connection
-        /*
-        if ($GLOBALS['DB_DSN'] == 'sqlite::memory:') {
-            $this->testQueries = true;
-        }
-        $this->db = new Persistence_SQL(($this->debug ? ('dumper:') : '').$GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD']);
-        $this->isPostgresql = ('pgsql' == $this->db->connection->connection()->getAttribute(\PDO::ATTR_DRIVER_NAME));
-        $this->isMysql = ('mysql' == $this->db->connection->connection()->getAttribute(\PDO::ATTR_DRIVER_NAME));
-        */
-
-        // establish connection
         $dsn = getenv('DSN');
         if ($dsn) {
             $this->db = Persistence::connect(($this->debug ? ('dumper:') : '').$dsn);
@@ -102,24 +92,26 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 
             // create table and fields from first row of data
             $first_row = current($data);
-            foreach ($first_row as $field => $row) {
-                if ($field === 'id') {
-                    $s->id('id');
-                    continue;
-                }
+            if ($first_row) {
+                foreach ($first_row as $field => $row) {
+                    if ($field === 'id') {
+                        $s->id('id');
+                        continue;
+                    }
 
-                if (is_int($row)) {
-                    $s->field($field, ['type' => 'integer']);
-                    continue;
-                } elseif (is_float($row)) {
-                    $s->field($field, ['type' => 'numeric(10,5)']);
-                    continue;
-                } elseif ($row instanceof \DateTime) {
-                    $s->field($field, ['type' => 'datetime']);
-                    continue;
-                }
+                    if (is_int($row)) {
+                        $s->field($field, ['type' => 'integer']);
+                        continue;
+                    } elseif (is_float($row)) {
+                        $s->field($field, ['type' => 'numeric(10,5)']);
+                        continue;
+                    } elseif ($row instanceof \DateTime) {
+                        $s->field($field, ['type' => 'datetime']);
+                        continue;
+                    }
 
-                $s->field($field);
+                    $s->field($field);
+                }
             }
 
             if (!isset($first_row['id'])) {
