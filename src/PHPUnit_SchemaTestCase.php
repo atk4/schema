@@ -78,8 +78,9 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
      * Sets database into a specific test.
      *
      * @param array $db_data
+     * @param bool  $import_data Should we import data of just create table
      */
-    public function setDB($db_data)
+    public function setDB($db_data, $import_data = true)
     {
         $this->tables = array_keys($db_data);
 
@@ -121,22 +122,24 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
             $s->create();
 
             // import data
-            $has_id = (bool) key($data);
+            if ($import_data) {
+                $has_id = (bool) key($data);
 
-            foreach ($data as $id => $row) {
-                $s = $this->db->dsql();
-                if ($id === '_') {
-                    continue;
+                foreach ($data as $id => $row) {
+                    $s = $this->db->dsql();
+                    if ($id === '_') {
+                        continue;
+                    }
+
+                    $s->table($table);
+                    $s->set($row);
+
+                    if (!isset($row['id']) && $has_id) {
+                        $s->set('id', $id);
+                    }
+
+                    $s->insert();
                 }
-
-                $s->table($table);
-                $s->set($row);
-
-                if (!isset($row['id']) && $has_id) {
-                    $s->set('id', $id);
-                }
-
-                $s->insert();
             }
         }
     }
