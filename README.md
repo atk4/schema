@@ -19,7 +19,7 @@ Resources and Community:
 
 Stats:
 
-[![Version](https://badge.fury.io/gh/atk4%2Fschema.svg)](https://packagist.org/packages/atk4/schema)
+[![GitHub release](https://img.shields.io/github/release/atk4/schema.svg)](CHANGELOG.md)
 
 
 ## Example
