@@ -49,11 +49,14 @@ done
 
 open "https://github.com/atk4/$product/compare/$prev_version...develop"
 
+composer remove --dev atk4/data
+composer remove atk4/dsql
+composer remove atk4/core
 # Tweak our json file
-sed -i "" -e '/atk4.*dev-develop/d' composer.json
-rm -rf vendor/atk4/
+#sed -i "" -e '/atk4.*dev-develop/d' composer.json
+#rm -rf vendor/atk4/
 #composer update
-composer require atk4/dsql atk4/core
+composer require atk4/dsql
 composer require --dev atk4/data
 composer update
 
