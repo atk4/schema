@@ -17,9 +17,7 @@ Resources and Community:
 [![Stack Overlfow Community](https://img.shields.io/stackexchange/stackoverflow/t/atk4.svg?maxAge=2592000)](http://stackoverflow.com/questions/ask?tags=atk4)
 [![Discord User forum](https://img.shields.io/badge/discord-User_Forum-green.svg)](https://forum.agiletoolkit.org/c/44)
 
-Stats:
 
-[![GitHub release](https://img.shields.io/github/release/atk4/schema.svg)](CHANGELOG.md)
 
 
 ## Example
