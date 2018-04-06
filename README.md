@@ -1,26 +1,51 @@
-# Agile Data - Schema Add-on
+# Agile Data - SQL Schema Management Add-on
 
-This extension for Agile Data implements ability to work with SQL schema,
-execute migrations, perform DB-tests on specific structures
+This extension for Agile Data implements ability to work with SQL schema, execute migrations, perform DB-tests in PHPUnit (used by other ATK frameworks) and sync up "Model" structure to the database.
 
-Code Quality:
+### Basic Usage:
 
-[![Build Status](https://travis-ci.org/atk4/schema.png?branch=develop)](https://travis-ci.org/atk4/schema)
-[![Code Climate](https://codeclimate.com/github/atk4/schema/badges/gpa.svg)](https://codeclimate.com/github/atk4/schema)
-[![StyleCI](https://styleci.io/repos/69662508/shield)](https://styleci.io/repos/69662508)
-[![Test Coverage](https://codeclimate.com/github/atk4/schema/badges/coverage.svg)](https://codeclimate.com/github/atk4/schema)
+``` php
+// Add the following code on your setup page / wizard:
 
-Resources and Community:
+$app->add('MigratorConsole')
+    ->migrateModels([
+        new Model\User($app->db), 
+        new Model\Order($app->db),
+        new Model\Payment($app->db)
+    ]);
+```
 
-[![Documentation Status](https://readthedocs.org/projects/agile-schema/badge/?version=develop)](http://agile-schema.readthedocs.io/en/develop/?badge=latest)
-[![Gitter](https://img.shields.io/gitter/room/atk4/atk4.svg?maxAge=2592000)](https://gitter.im/atk4/atk4?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Stack Overlfow Community](https://img.shields.io/stackexchange/stackoverflow/t/atk4.svg?maxAge=2592000)](http://stackoverflow.com/questions/ask?tags=atk4)
-[![Discord User forum](https://img.shields.io/badge/discord-User_Forum-green.svg)](https://forum.agiletoolkit.org/c/44)
+The user will see a console which would adjust database to contain required tables / fields for the models:
 
+![migrator-console](docs/migrator-console.png)
 
+Of course it's also possible to perform migration without visual feedback:
 
+``` php
+$changes = (new \atk4\schema\Migration\MySQL(new User($app->db)))->migrate();
+```
 
-## Example
+If you need a more fine-graned migration, you can define them in great detail.
+
+``` php
+// create table
+$migration = new \atk4\schema\Migration\MySQL($app->db);
+$migration->table('user')
+    ->id()
+    ->field('name')
+    ->field('address', ['type'=>'text']);
+    ->create();
+
+// or alter
+$migration = new \atk4\schema\Migration\MySQL($app->db);
+$migration->table('user')
+    ->newField('age', ['type'=>'integer'])
+    ->alter();
+```
+
+You can also use `\atk4\schema\Migration\Sqlite`. Other SQL databases are not yet supported. Field declaration uses same types as [ATK Data](https://github.com/atk4/data).
+
+## Examples
 
 `schema\Migration` is a simple class for building schema-related
 queries using DSQL.
@@ -47,20 +72,6 @@ $tables = $s->getDB($tables);
 // do anything with tables
 
 $s->setDB($tables);
-```
-
-`schema\AutoCreator` is a simple class reads model and decides
-if any changes to the database are needed. Will create a
-necessary schema\Migration which you can execute.
-
-``` php
-<?php
-$a = new \atk4\data\schema\AutoCreator($m_order);
-
-// or
-
-$a = new \atk4\data\schema\AutoCreator($m_order, ['no_auto' => true]);
-$a->compare()->execute();
 ```
 
 ## Integration with PHPUnit
