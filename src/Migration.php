@@ -159,7 +159,7 @@ class Migration extends Expression_MySQL
     /**
      * Will read current schema and consult current 'field' arguments, to see if they are matched.
      * If table does not exist, will invoke ->create. If table does exist, then it will execute
-     * methods ->addColumn(), ->dropColumn()  or ->updateColumn() as needed, then call ->alter()
+     * methods ->newField(), ->dropField() or ->alterField() as needed, then call ->alter()
      *
      * @return string Returns short textual info for logging purposes
      */
@@ -179,24 +179,31 @@ class Migration extends Expression_MySQL
         $old = $migration2->_getFields();
         $new = $this->_getFields();
 
+        // add new fields or update existing ones
         foreach ($new as $field => $options) {
             if ($field == 'id') {
                 continue;
             }
 
             if (isset($old[$field])) {
+
                 // todo - compare options and if needed, call
-                //$this->alterField($field, $options);
+                if (isset($old[$field]['type'],$options['type']) && $old[$field]['type']!=$options['type']) {
+                    $this->alterField($field, $options);
+                    $altered++;
+                    $changes++;
+                }
+
                 unset($old[$field]);
             } else {
-                // new field, so
+                // new field, so let's just add it
                 $this->newField($field, $options);
                 $added++;
                 $changes++;
             }
         }
 
-        // remaining fields
+        // remaining old fields - drop them
         foreach ($old as $field => $options) {
             if ($field == 'id') {
                 continue;
@@ -336,6 +343,49 @@ class Migration extends Expression_MySQL
     }
 
     /**
+     * Convert SQL field types to Agile Data field types.
+     *
+     * @param string $type SQL field type
+     *
+     * @return string
+     */
+    public function getModelFieldType($type)
+    {
+        if (substr($type, 0,7) == 'varchar') {
+            $type = null;
+        }
+
+        if (substr($type, 0,4) == 'char') {
+            $type = null;
+        }
+        if (substr($type, 0,4) == 'enum') {
+            $type = null;
+        }
+
+        if ($type == 'int') {
+            $type = 'integer';
+        }
+
+        if ($type == 'decimal') {
+            $type = 'integer';
+        }
+
+        if ($type == 'tinyint') {
+            $type = 'boolean';
+        }
+
+        if ($type == 'longtext') {
+            $type = 'text';
+        }
+
+        if ($type == 'longblob') {
+            $type = 'text';
+        }
+
+        return $type;
+    }
+
+    /**
      * Import fields from database into migration field config.
      *
      * @param string $table
@@ -353,37 +403,7 @@ class Migration extends Expression_MySQL
                 continue;
             }
 
-            $type = $row['type'];
-            if (substr($type, 0,7) == 'varchar') {
-                $type = null;
-            }
-
-            if (substr($type, 0,4) == 'char') {
-                $type = null;
-            }
-            if (substr($type, 0,4) == 'enum') {
-                $type = null;
-            }
-
-            if ($type == 'int') {
-                $type = 'integer';
-            }
-
-            if ($type == 'decimal') {
-                $type = 'integer';
-            }
-
-            if ($type == 'tinyint') {
-                $type = 'boolean';
-            }
-
-            if ($type == 'longtext') {
-                $type = 'text';
-            }
-
-            if ($type == 'longblob') {
-                $type = 'text';
-            }
+            $type = $this->getModelFieldType($row['type']);
 
             $this->field($row['name'], ['type'=>$type]);
         }
