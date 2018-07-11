@@ -181,6 +181,7 @@ class Migration extends Expression_MySQL
 
         // add new fields or update existing ones
         foreach ($new as $field => $options) {
+            // never update ID field (sadly hard-coded field name)
             if ($field == 'id') {
                 continue;
             }
@@ -188,7 +189,7 @@ class Migration extends Expression_MySQL
             if (isset($old[$field])) {
 
                 // todo - compare options and if needed, call
-                if (isset($old[$field]['type'],$options['type']) && $old[$field]['type']!=$options['type']) {
+                if (array_key_exists('type',$old[$field]) && array_key_exists('type', $options) && $old[$field]['type']!=$options['type']) {
                     $this->alterField($field, $options);
                     $altered++;
                     $changes++;
@@ -205,15 +206,22 @@ class Migration extends Expression_MySQL
 
         // remaining old fields - drop them
         foreach ($old as $field => $options) {
+            // never delete ID field (sadly hard-coded field name)
             if ($field == 'id') {
                 continue;
             }
-            //$this->dropField($field);
+
+            $this->dropField($field);
+            $dropped++;
+            $changes++;
         }
 
-        if($changes) {
+        if ($changes) {
             $this->alter();
-            return 'added '.$added.' field'.($added%10==1?'':'s').' and changed '.$altered;
+
+            return 'added '.$added.' field'.($added%10==1?'':'s').', '.
+                'changed '.$altered.' field'.($altered%10==1?'':'s').' and '.
+                'deleted '.$dropped.' field'.($dropped%10==1?'':'s');
         }
 
         return 'no changes';
