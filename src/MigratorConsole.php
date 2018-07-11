@@ -17,7 +17,7 @@ class MigratorConsole extends \atk4\ui\Console
         // run inside callback
         $this->set(function($c) use ($models) {
 
-            $c->notice('Preparing to mirgate models');
+            $c->notice('Preparing to migrate models');
             $p = $c->app->db;
 
             foreach($models as $model) {
