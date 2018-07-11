@@ -188,7 +188,8 @@ class Migration extends Expression_MySQL
 
             if (isset($old[$field])) {
 
-                // todo - compare options and if needed, call
+                // compare options and if needed alter field
+                // @todo add more options here like 'len'
                 if (array_key_exists('type',$old[$field]) && array_key_exists('type', $options) && $old[$field]['type']!=$options['type']) {
                     $this->alterField($field, $options);
                     $altered++;
