@@ -16,6 +16,9 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
     /** @var bool Debug mode enabled/disabled. In debug mode will use Dumper persistence */
     public $debug = false;
 
+    /** @var string DSN string */
+    protected $dsn;
+
     /** @var string What DB driver we use - mysql, sqlite, pgsql etc */
     public $driver = 'sqlite';
 
@@ -27,17 +30,19 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         parent::setUp();
 
         // establish connection
-        if (isset($GLOBALS['DB_DSN'])) {
-            $dsn = ($this->debug ? ('dumper:') : '').$GLOBALS['DB_DSN'];
-            $user = isset($GLOBALS['DB_USER']) ? $GLOBALS['DB_USER'] : null;
-            $pass = isset($GLOBALS['DB_PASSWD']) ? $GLOBALS['DB_PASSWD'] : null;
-            $this->db = Persistence::connect($dsn, $user, $pass);
+        $this->dsn = ($this->debug ? ('dumper:') : '') . (isset($GLOBALS['DB_DSN']) ? $GLOBALS['DB_DSN'] : 'sqlite:memory');
+        $user = isset($GLOBALS['DB_USER']) ? $GLOBALS['DB_USER'] : null;
+        $pass = isset($GLOBALS['DB_PASSWD']) ? $GLOBALS['DB_PASSWD'] : null;
 
-            list($this->driver, $junk) = explode(':', $dsn, 2);
-            $this->driver = strtolower($this->driver);
+        $this->db = Persistence::connect($this->dsn, $user, $pass);
+
+        // extract dirver
+        if ($this->debug) {
+            list($dumper_driver, $this->driver, $junk) = explode(':', $dsn, 3);
         } else {
-            $this->db = Persistence::connect(($this->debug ? ('dumper:') : '').'sqlite::memory:');
+            list($this->driver, $junk) = explode(':', $dsn, 2);
         }
+        $this->driver = strtolower($this->driver);
     }
 
     /**
@@ -62,7 +67,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
                 throw new \atk4\core\Exception([
                     'Not sure which migration class to use for your DSN',
                     'driver' => $this->driver,
-                    'dsn'    => getenv('DSN'),
+                    'dsn'    => $this->dsn,
                 ]);
         }
     }
