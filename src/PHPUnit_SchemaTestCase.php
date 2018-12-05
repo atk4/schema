@@ -1,9 +1,10 @@
 <?php
 
-namespace atk4\schema\tests;
+namespace atk4\schema;
 
 use atk4\data\Persistence;
 
+// NOTE: This class should stay here in this namespace because other repos rely on it. For example, atk4\data tests
 class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 {
     /** @var \atk4\data\Persistence Persistence instance */

@@ -2,7 +2,7 @@
 
 namespace atk4\schema\tests;
 
-class BasicTest extends PHPUnit_SchemaTestCase
+class BasicTest extends \atk4\schema\PHPUnit_SchemaTestCase
 {
     /**
      * Test constructor.
