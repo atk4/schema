@@ -20,4 +20,5 @@ class SchemaTestcaseTest extends \atk4\core\PHPUnit_AgileTestCase
 
         $this->assertEquals($q, $this->getDB('user', true));
     }
+
 }
