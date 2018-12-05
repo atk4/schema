@@ -38,9 +38,9 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 
         // extract dirver
         if ($this->debug) {
-            list($dumper_driver, $this->driver, $junk) = explode(':', $dsn, 3);
+            list($dumper_driver, $this->driver, $junk) = explode(':', $this->dsn, 3);
         } else {
-            list($this->driver, $junk) = explode(':', $dsn, 2);
+            list($this->driver, $junk) = explode(':', $this->dsn, 2);
         }
         $this->driver = strtolower($this->driver);
     }
