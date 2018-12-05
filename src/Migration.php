@@ -41,7 +41,7 @@ class Migration extends Expression
     {
         parent::__construct($params);
 
-var_dump($source);
+        var_dump($source);
 
         if ($source instanceof \atk4\dsql\Connection) {
             $this->connection = $source;
