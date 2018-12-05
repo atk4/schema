@@ -45,6 +45,10 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
 
     public function testMigrateTable()
     {
+        if ($this->driver == 'sqlite') {
+            $this->markTestIncomplete('This test is not supported on '.$this->driver);
+        }
+
         $this->dropTable('user');
         $m = $this->getMigration($this->db);
         $m->table('user')->id()
