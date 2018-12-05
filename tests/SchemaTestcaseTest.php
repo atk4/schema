@@ -2,7 +2,7 @@
 
 namespace atk4\schema\tests;
 
-class SchemaTestcaseTest extends \atk4\schema\PHPUnit_SchemaTestCase
+class SchemaTestcaseTest extends \atk4\core\PHPUnit_AgileTestCase
 {
     public function testInit()
     {
