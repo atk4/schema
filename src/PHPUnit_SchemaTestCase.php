@@ -28,7 +28,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 
         // establish connection
         if (isset($GLOBALS['DB_DSN'])) {
-            $dsn = ($this->debug ? ('dumper:') : '') . $GLOBALS['DB_DSN'];
+            $dsn = ($this->debug ? ('dumper:') : '').$GLOBALS['DB_DSN'];
             $user = isset($GLOBALS['DB_USER']) ? $GLOBALS['DB_USER'] : null;
             $pass = isset($GLOBALS['DB_PASSWD']) ? $GLOBALS['DB_PASSWD'] : null;
             $this->db = Persistence::connect($dsn, $user, $pass);
