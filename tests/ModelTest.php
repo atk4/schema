@@ -7,7 +7,7 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
     public function testSetModelCreate()
     {
         $this->dropTable('user');
-        $user = new Testuser($this->db);
+        $user = new TestUser($this->db);
 
         $migration = $this->getMigration($user);
         $migration->create();

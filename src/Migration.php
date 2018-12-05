@@ -41,8 +41,6 @@ class Migration extends Expression
     {
         parent::__construct($params);
 
-        var_dump($source);
-
         if ($source instanceof \atk4\dsql\Connection) {
             $this->connection = $source;
 
@@ -467,7 +465,7 @@ class Migration extends Expression
             $name = 'id';
         }
 
-        $val = $this->expr($this->primary_key_expr);
+        $val = $this->connection->expr($this->primary_key_expr);
 
         $this->args['field'] =
             [$name => $val] + (isset($this->args['field']) ? $this->args['field'] : []);

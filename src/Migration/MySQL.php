@@ -10,7 +10,7 @@ class MySQL extends \atk4\schema\Migration
      *
      * @var string
      */
-    protected $escape_char = '"';
+    protected $escape_char = '`';
 
     /** @var string Expression to create primary key */
     public $primary_key_expr = 'integer primary key auto_increment';
