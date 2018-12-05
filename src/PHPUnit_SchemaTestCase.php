@@ -30,7 +30,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         parent::setUp();
 
         // establish connection
-        $this->dsn = ($this->debug ? ('dumper:') : '').(isset($GLOBALS['DB_DSN']) ? $GLOBALS['DB_DSN'] : 'sqlite:memory');
+        $this->dsn = ($this->debug ? ('dumper:') : '').(isset($GLOBALS['DB_DSN']) ? $GLOBALS['DB_DSN'] : 'sqlite::memory:');
         $user = isset($GLOBALS['DB_USER']) ? $GLOBALS['DB_USER'] : null;
         $pass = isset($GLOBALS['DB_PASSWD']) ? $GLOBALS['DB_PASSWD'] : null;
 
@@ -59,10 +59,10 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
                 return new \atk4\schema\Migration\SQLite($m ?: $this->db);
             case 'mysql':
                 return new \atk4\schema\Migration\MySQL($m ?: $this->db);
-            //case 'pgsql':
-            //    return new \atk4\schema\Migration\PgSQL($m ?: $this->db);
-            //case 'oci':
-            //    return new \atk4\schema\Migration\Oracle($m ?: $this->db);
+            case 'pgsql':
+                return new \atk4\schema\Migration\PgSQL($m ?: $this->db);
+            case 'oci':
+                return new \atk4\schema\Migration\Oracle($m ?: $this->db);
             default:
                 throw new \atk4\core\Exception([
                     'Not sure which migration class to use for your DSN',
