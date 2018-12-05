@@ -1,6 +1,6 @@
 <?php
 
-namespace atk4\schema;
+namespace atk4\schema\tests;
 
 use atk4\data\Persistence;
 
