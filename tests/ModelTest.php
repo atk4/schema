@@ -46,6 +46,8 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
     public function testMigrateTable()
     {
         if ($this->driver == 'sqlite') {
+            // SQLite doesn't support DROP COLUMN in ALTER TABLE
+            // http://www.sqlitetutorial.net/sqlite-alter-table/
             $this->markTestIncomplete('This test is not supported on '.$this->driver);
         }
 
