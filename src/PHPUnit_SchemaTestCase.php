@@ -27,9 +27,12 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         parent::setUp();
 
         // establish connection
-        $dsn = getenv('DSN') ?: (isset($GLOBALS['DB_DSN']) ? $GLOBALS['DB_DSN'] : null);
-        if ($dsn) {
-            $this->db = Persistence::connect(($this->debug ? ('dumper:') : '').$dsn);
+        if (isset($GLOBALS['DB_DSN'])) {
+            $dsn = ($this->debug ? ('dumper:') : '') . $GLOBALS['DB_DSN'];
+            $user = isset($GLOBALS['DB_USER']) ? $GLOBALS['DB_USER'] : null;
+            $pass = isset($GLOBALS['DB_PASSWD']) ? $GLOBALS['DB_PASSWD'] : null;
+            $this->db = Persistence::connect($dsn, $user, $pass);
+
             list($this->driver, $junk) = explode(':', $dsn, 2);
             $this->driver = strtolower($this->driver);
         } else {
