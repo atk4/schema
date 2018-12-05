@@ -4,6 +4,8 @@ namespace atk4\schema\tests;
 
 class ModelTest extends PHPUnit_SchemaTestCase
 {
+    public $debug=true;
+
     public function testSetModelCreate()
     {
         $this->dropTable('user');
