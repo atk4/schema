@@ -5,6 +5,8 @@
     "keywords": ["agile", "schema", "data", "migration", "alter", "sql", "framework"],
     "homepage": "http://github.com/atk4/schema",
     "license": "MIT",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "authors": [
         {
             "name": "Romans Malinovskis",
