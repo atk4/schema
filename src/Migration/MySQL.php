@@ -4,6 +4,14 @@ namespace atk4\schema\Migration;
 
 class MySQL extends \atk4\schema\Migration
 {
+    /**
+     * Field, table and alias name escaping symbol.
+     * By SQL Standard it's double quote, but MySQL uses backtick.
+     *
+     * @var string
+     */
+    protected $escape_char = '"';
+
     /** @var string Expression to create primary key */
     public $primary_key_expr = 'integer primary key auto_increment';
 

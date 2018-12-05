@@ -4,9 +4,8 @@ namespace atk4\schema;
 
 use atk4\core\Exception;
 use atk4\dsql\Expression;
-use atk4\dsql\Expression_MySQL;
 
-class Migration extends Expression_MySQL
+class Migration extends Expression
 {
     /** @var string Expression mode. See $templates. */
     public $mode = 'create';
@@ -20,6 +19,14 @@ class Migration extends Expression_MySQL
 
     /** @var \atk4\dsql\Connection Database connection */
     public $connection;
+
+    /**
+     * Field, table and alias name escaping symbol.
+     * By SQL Standard it's double quote, but MySQL uses backtick.
+     *
+     * @var string
+     */
+    protected $escape_char = '"';
 
     /** @var string Expression to create primary key */
     public $primary_key_expr = 'integer primary key autoincrement';
