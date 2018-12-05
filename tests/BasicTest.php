@@ -1,6 +1,6 @@
 <?php
 
-namespace atk4\ui\tests;
+namespace atk4\schema\tests;
 
 use \atk4\schema\Migration\SQLite as Migration;
 
