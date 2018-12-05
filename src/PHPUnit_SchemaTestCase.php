@@ -30,7 +30,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         parent::setUp();
 
         // establish connection
-        $this->dsn = ($this->debug ? ('dumper:') : '') . (isset($GLOBALS['DB_DSN']) ? $GLOBALS['DB_DSN'] : 'sqlite:memory');
+        $this->dsn = ($this->debug ? ('dumper:') : '').(isset($GLOBALS['DB_DSN']) ? $GLOBALS['DB_DSN'] : 'sqlite:memory');
         $user = isset($GLOBALS['DB_USER']) ? $GLOBALS['DB_USER'] : null;
         $pass = isset($GLOBALS['DB_PASSWD']) ? $GLOBALS['DB_PASSWD'] : null;
 
