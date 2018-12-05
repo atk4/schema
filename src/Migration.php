@@ -505,7 +505,7 @@ class Migration extends Expression_MySQL
     {
         $type = strtolower(isset($options['type']) ?
                 $options['type'] : 'varchar');
-        $type = preg_replace('/[^a-z0-9]+/', '', $type);
+        $type = preg_replace('/[^a-z0-9\(\),;\.]+/', '', $type);
 
         $len = isset($options['len']) ?
                 $options['len'] :
