@@ -58,7 +58,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
                 throw new \atk4\core\Exception([
                     'Not sure which migration class to use for your DSN',
                     'driver' => $this->driver,
-                    'dsn' => getenv('DSN'),
+                    'dsn'    => getenv('DSN'),
                 ]);
         }
     }
@@ -71,7 +71,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
      */
     public function dropTable($table)
     {
-        $this->db->connection->expr("drop table if exists {}", [$table])->execute();
+        $this->db->connection->expr('drop table if exists {}', [$table])->execute();
     }
 
     /**

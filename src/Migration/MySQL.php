@@ -15,7 +15,8 @@ class MySQL extends \atk4\schema\Migration
      *
      * @return array
      */
-    public function describeTable($table) {
+    public function describeTable($table)
+    {
         if (!$this->connection->expr('show tables like []', [$table])->get()) {
             return []; // no such table
         }
@@ -26,7 +27,7 @@ class MySQL extends \atk4\schema\Migration
             $row2 = [];
             $row2['name'] = $row['Field'];
             $row2['pk'] = $row['Key'] == 'PRI';
-            $row2['type'] = preg_replace('/\(.*/','', $row['Type']);
+            $row2['type'] = preg_replace('/\(.*/', '', $row['Type']);
 
             $result[] = $row2;
         }

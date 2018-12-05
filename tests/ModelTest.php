@@ -2,8 +2,6 @@
 
 namespace atk4\schema\tests;
 
-use \atk4\schema\Migration\SQLite as Migration;
-
 class ModelTest extends PHPUnit_SchemaTestCase
 {
     public function testSetModelCreate()
@@ -30,7 +28,7 @@ class ModelTest extends PHPUnit_SchemaTestCase
             ->create();
         $this->db->dsql()->table('user')
             ->set([
-                'id' => 1,
+                'id'  => 1,
                 'foo' => 'foovalue',
                 'bar' => 123,
                 'baz' => 'long text value',
@@ -54,7 +52,7 @@ class ModelTest extends PHPUnit_SchemaTestCase
             ->create();
         $this->db->dsql()->table('user')
             ->set([
-                'id' => 1,
+                'id'  => 1,
                 'foo' => 'foovalue',
                 'bar' => 123,
                 'baz' => 'long text value',
@@ -69,10 +67,12 @@ class ModelTest extends PHPUnit_SchemaTestCase
     }
 }
 
-class TestUser extends \atk4\data\Model {
+class TestUser extends \atk4\data\Model
+{
     public $table = 'user';
 
-    public function init() {
+    public function init()
+    {
         parent::init();
 
         $this->addField('name');
@@ -80,5 +80,4 @@ class TestUser extends \atk4\data\Model {
         $this->addField('is_admin', ['type'=>'boolean']);
         $this->addField('notes', ['type'=>'text']);
     }
-
 }

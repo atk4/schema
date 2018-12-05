@@ -36,15 +36,18 @@ class Migration extends Expression_MySQL
 
         if ($source instanceof \atk4\dsql\Connection) {
             $this->connection = $source;
+
             return;
         } elseif ($source instanceof \atk4\data\Persistence_SQL) {
             $this->connection = $source->connection;
+
             return;
         } elseif ($source instanceof \atk4\data\Model) {
             if ($source->persistence && $source->persistence instanceof \atk4\data\Persistence_SQL) {
                 $this->connection = $source->persistence->connection;
 
                 $this->setModel($source);
+
                 return;
             }
         }
@@ -66,7 +69,7 @@ class Migration extends Expression_MySQL
     {
         $this->table($m->table);
 
-        foreach($m->elements as $field) {
+        foreach ($m->elements as $field) {
             // ignore not persisted model fields
             if (!$field instanceof \atk4\data\Field) {
                 continue;
@@ -146,20 +149,10 @@ class Migration extends Expression_MySQL
         return $this;
     }
 
-
-
-
-
-
-
-
-
-
-
     /**
      * Will read current schema and consult current 'field' arguments, to see if they are matched.
      * If table does not exist, will invoke ->create. If table does exist, then it will execute
-     * methods ->newField(), ->dropField() or ->alterField() as needed, then call ->alter()
+     * methods ->newField(), ->dropField() or ->alterField() as needed, then call ->alter().
      *
      * @return string Returns short textual info for logging purposes
      */
@@ -173,6 +166,7 @@ class Migration extends Expression_MySQL
         if (!$migration2->importTable($this['table'])) {
             // should probably use custom exception class here
             $this->create();
+
             return 'created new table';
         }
 
@@ -190,7 +184,7 @@ class Migration extends Expression_MySQL
 
                 // compare options and if needed alter field
                 // @todo add more options here like 'len'
-                if (array_key_exists('type',$old[$field]) && array_key_exists('type', $options) && $old[$field]['type']!=$options['type']) {
+                if (array_key_exists('type', $old[$field]) && array_key_exists('type', $options) && $old[$field]['type'] != $options['type']) {
                     $this->alterField($field, $options);
                     $altered++;
                     $changes++;
@@ -220,9 +214,9 @@ class Migration extends Expression_MySQL
         if ($changes) {
             $this->alter();
 
-            return 'added '.$added.' field'.($added%10==1?'':'s').', '.
-                'changed '.$altered.' field'.($altered%10==1?'':'s').' and '.
-                'deleted '.$dropped.' field'.($dropped%10==1?'':'s');
+            return 'added '.$added.' field'.($added % 10 == 1 ? '' : 's').', '.
+                'changed '.$altered.' field'.($altered % 10 == 1 ? '' : 's').' and '.
+                'deleted '.$dropped.' field'.($dropped % 10 == 1 ? '' : 's');
         }
 
         return 'no changes';
@@ -238,26 +232,25 @@ class Migration extends Expression_MySQL
         $result = [];
 
         if (isset($this->args['dropField'])) {
-            foreach($this->args['dropField'] as $field => $junk) {
-                $result[] = 'drop column '. $this->_escape($field);
+            foreach ($this->args['dropField'] as $field => $junk) {
+                $result[] = 'drop column '.$this->_escape($field);
             }
         }
 
         if (isset($this->args['newField'])) {
-            foreach($this->args['newField'] as $field => $option) {
-                $result[] = 'add column '. $this->_render_one_field($field, $option);
+            foreach ($this->args['newField'] as $field => $option) {
+                $result[] = 'add column '.$this->_render_one_field($field, $option);
             }
         }
 
         if (isset($this->args['alterField'])) {
-            foreach($this->args['alterField'] as $field => $option) {
-                $result[] = 'change column '. $this->_escape($field). ' '. $this->_render_one_field($field, $option);
+            foreach ($this->args['alterField'] as $field => $option) {
+                $result[] = 'change column '.$this->_escape($field).' '.$this->_render_one_field($field, $option);
             }
         }
 
-        return join(', ', $result);
+        return implode(', ', $result);
     }
-
 
     /**
      * Create rough model from current set of $this->args['fields']. This is not
@@ -273,10 +266,11 @@ class Migration extends Expression_MySQL
         $m = new \atk4\data\Model([$persistence, 'table'=>$table ?: $this['table'] = $table]);
 
         foreach ($this->_getFields() as $field => $options) {
+            if ($field == 'id') {
+                continue;
+            }
 
-            if($field=='id')continue;
-
-            if(is_object($options)) {
+            if (is_object($options)) {
                 continue;
             }
 
@@ -319,6 +313,7 @@ class Migration extends Expression_MySQL
     public function alterField($field, $options = [])
     {
         $this->_set_args('alterField', $field, $options);
+
         return $this;
     }
 
@@ -336,7 +331,6 @@ class Migration extends Expression_MySQL
         return $this;
     }
 
-
     /**
      * Return database table descriptions.
      * DB engine specific.
@@ -347,7 +341,8 @@ class Migration extends Expression_MySQL
      *
      * @return array
      */
-    public function describeTable($table) {
+    public function describeTable($table)
+    {
         return $this->connection->expr('pragma table_info({})', [$table])->get();
     }
 
@@ -360,14 +355,14 @@ class Migration extends Expression_MySQL
      */
     public function getModelFieldType($type)
     {
-        if (substr($type, 0,7) == 'varchar') {
+        if (substr($type, 0, 7) == 'varchar') {
             $type = null;
         }
 
-        if (substr($type, 0,4) == 'char') {
+        if (substr($type, 0, 4) == 'char') {
             $type = null;
         }
-        if (substr($type, 0,4) == 'enum') {
+        if (substr($type, 0, 4) == 'enum') {
             $type = null;
         }
 
@@ -405,7 +400,7 @@ class Migration extends Expression_MySQL
     {
         $this->table($table);
         $has_fields = false;
-        foreach($this->describeTable($table) as $row) {
+        foreach ($this->describeTable($table) as $row) {
             $has_fields = true;
             if ($row['pk']) {
                 $this->id($row['name']);
@@ -508,15 +503,15 @@ class Migration extends Expression_MySQL
      */
     protected function _render_one_field($field, $options)
     {
-            $type = strtolower(isset($options['type']) ?
+        $type = strtolower(isset($options['type']) ?
                 $options['type'] : 'varchar');
-            $type = preg_replace('/[^a-z0-9]+/', '', $type);
+        $type = preg_replace('/[^a-z0-9]+/', '', $type);
 
-            $len = isset($options['len']) ?
+        $len = isset($options['len']) ?
                 $options['len'] :
                 ($type === 'varchar' ? 255 : null);
 
-            return $this->_escape($field).' '.$type.
+        return $this->_escape($field).' '.$type.
                 ($len ? ('('.$len.')') : '');
     }
 

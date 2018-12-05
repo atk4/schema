@@ -20,5 +20,4 @@ class SchemaTestcaseTest extends PHPUnit_SchemaTestCase
 
         $this->assertEquals($q, $this->getDB('user', true));
     }
-
 }

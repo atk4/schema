@@ -2,8 +2,6 @@
 
 namespace atk4\schema\tests;
 
-use \atk4\schema\Migration\SQLite as Migration;
-
 class BasicTest extends PHPUnit_SchemaTestCase
 {
     /**
