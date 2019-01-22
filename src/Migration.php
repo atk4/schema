@@ -310,8 +310,6 @@ class Migration extends Expression
     /**
      * Sets alterField argument.
      *
-     * Note: can not rename fields
-     *
      * @param string $field
      * @param array  $options
      *
