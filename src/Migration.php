@@ -510,6 +510,8 @@ class Migration extends Expression
      */
     protected function _render_one_field($field, $options)
     {
+        $name = isset($options['name']) ? $options['name'] : $field;
+
         $type = strtolower(isset($options['type']) ?
                 $options['type'] : 'varchar');
         $type = preg_replace('/[^a-z0-9\(\),;\.]+/', '', $type);
@@ -517,8 +519,8 @@ class Migration extends Expression
         $len = isset($options['len']) ?
                 $options['len'] :
                 ($type === 'varchar' ? 255 : null);
-
-        return $this->_escape($field).' '.$type.
+        
+        return $this->_escape($name).' '.$type.
                 ($len ? ('('.$len.')') : '');
     }
 
