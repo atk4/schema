@@ -519,7 +519,7 @@ class Migration extends Expression
         $len = isset($options['len']) ?
                 $options['len'] :
                 ($type === 'varchar' ? 255 : null);
-        
+
         return $this->_escape($name).' '.$type.
                 ($len ? ('('.$len.')') : '');
     }
