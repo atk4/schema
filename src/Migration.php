@@ -15,6 +15,7 @@ class Migration extends Expression
         'create' => 'create table {table} ([field])',
         'drop'   => 'drop table if exists {table}',
         'alter'  => 'alter table {table} [statements]',
+        'rename' => 'rename table {old_table} to {table}',
     ];
 
     /** @var \atk4\dsql\Connection Database connection */
@@ -152,6 +153,18 @@ class Migration extends Expression
     public function alter()
     {
         $this->mode('alter')->execute();
+
+        return $this;
+    }
+
+    /**
+     * Rename table.
+     *
+     * @return $this
+     */
+    public function rename()
+    {
+        $this->mode('rename')->execute();
 
         return $this;
     }
@@ -421,7 +434,7 @@ class Migration extends Expression
     }
 
     /**
-     * Sets table.
+     * Sets table name.
      *
      * @param string $table
      *
@@ -430,6 +443,20 @@ class Migration extends Expression
     public function table($table)
     {
         $this['table'] = $table;
+
+        return $this;
+    }
+
+    /**
+     * Sets old table name.
+     *
+     * @param string $table
+     *
+     * @return $this
+     */
+    public function old_table($old_table)
+    {
+        $this['old_table'] = $old_table;
 
         return $this;
     }
