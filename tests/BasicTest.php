@@ -15,6 +15,19 @@ class BasicTest extends \atk4\schema\PHPUnit_SchemaTestCase
             ->field('foo')
             ->field('bar', ['type'=>'integer'])
             ->field('baz', ['type'=>'text'])
+	
+	        ->field('bl', ['type'=>'boolean'])
+	        
+	        ->field('tm', ['type'=>'time'])
+            ->field('dt', ['type'=>'date'])
+            ->field('dttm', ['type'=>'datetime'])
+	
+	        ->field('dbl', ['type'=>'double'])
+	        ->field('fl', ['type'=>'float'])
+	        ->field('mn', ['type'=>'money'])
+	
+	        ->field('en', ['type'=>'enum'])
+	        
             ->create();
 
         $m = $this->getMigration();
@@ -38,7 +51,20 @@ class BasicTest extends \atk4\schema\PHPUnit_SchemaTestCase
             ->field('foo')
             ->field('bar', ['type'=>'integer'])
             ->field('baz', ['type'=>'text'])
-            ->create();
+	
+	        ->field('bl', ['type'=>'boolean'])
+	        
+	        ->field('tm', ['type'=>'time'])
+	        ->field('dt', ['type'=>'date'])
+	        ->field('dttm', ['type'=>'datetime'])
+	
+	        ->field('dbl', ['type'=>'double'])
+	        ->field('fl', ['type'=>'float'])
+	        ->field('mn', ['type'=>'money'])
+	
+	        ->field('en', ['type'=>'enum'])
+	
+	        ->create();
 
         $m = $this->getMigration();
         $m->table('user')
