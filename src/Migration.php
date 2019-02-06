@@ -46,6 +46,7 @@ class Migration extends Expression
 	 */
 	public $DSQLDataTypeTranscodes
 		= [
+			'boolean'  => 'BOOLEAN',
 			'integer'  => 'INT4',
 			'string'   => 'VARCHAR256',
 			'password' => 'VARCHAR256',
@@ -57,15 +58,16 @@ class Migration extends Expression
 			'time'     => 'TIME',
 			'text'     => 'TEXT',
 			'array'    => 'TEXT',
-			'object'   => 'BLOB',
-			'boolean'  => 'BOOLEAN',
+			'object'   => 'TEXT',
 		];
 	
 	/**
 	 * @var string if no transcode match fallaback to default
 	 *
+	 * changed to text because is better to have more space than 256 char
+	 * i had a problem storing EXIFData serialized
 	 */
-	public $DSQLDataTypeTranscodeDefault = 'VARCHAR256';
+	public $DSQLDataTypeTranscodeDefault = 'TEXT';
 	
 	/**
 	 * @var array Datatypes to decode driver specific type and len of field
