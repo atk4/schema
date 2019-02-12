@@ -45,7 +45,7 @@ class Migration extends Expression
      * add : double, password
      *
      */
-    public $DSQLDataTypeTranscodes
+    public $dataTypeTranscodes
         = [
             'boolean'  => 'BOOLEAN',
             'integer'  => 'INT4',
@@ -59,7 +59,7 @@ class Migration extends Expression
             'time'     => 'TIME',
             'text'     => 'TEXT',
             'array'    => 'TEXT',
-            'object'   => 'INT4',
+            'object'   => 'TEXT',
         ];
     
     /**
@@ -68,13 +68,13 @@ class Migration extends Expression
      * changed to text because is better to have more space than 256 char
      * i had a problem storing EXIFData serialized
      */
-    public $DSQLDataTypeTranscodeDefault = 'TEXT';
+    public $dataTypeTranscodeDefault = 'TEXT';
     
     /**
      * @var array Datatypes to decode driver specific type and len of field
      * is defined in the extended Migration class
      */
-    public $DriverDataTypeTranscodes = [];
+    public $driverDataTypeTranscodes = [];
     
     /**
      * Create new migration.
@@ -140,7 +140,7 @@ class Migration extends Expression
                 continue;
             }
             
-            $transcodeTypeKey = $this->getTranscodeTypeKeyDSQL($field);
+            $transcodeTypeKey = $this->getTranscodeTypeKeyFromField($field);
             
             $this->field($field->actual ?: $field->short_name, ['transcode_key' => $transcodeTypeKey]);
         }
@@ -474,7 +474,7 @@ class Migration extends Expression
             $type = strtok($row['type'], '(');
             
             // get transcode key from Drivers DataTypeTrancode
-            $transcodeTypeKey = $this->getTranscodeTypeKeyTable($type);
+            $transcodeTypeKey = $this->getTranscodeTypeKeyFromTypeName($type);
     
             // call field with options 'transcode_key' to know is an internal call
             $this->field($row['name'], ['transcode_key' => $transcodeTypeKey]);
@@ -523,14 +523,14 @@ class Migration extends Expression
     {
         // is is set is internal call
         if (isset($options['transcode_key'])) {
-            $options = $this->DriverDataTypeTranscodes[$options['transcode_key']];
+            $options = $this->driverDataTypeTranscodes[$options['transcode_key']];
         } else {
             // is is call from outside, need to normalize
             $type = isset($options['type']) ? $options['type'] : '';
         
-            $transcodeTypeKey = $this->getTranscodeTypeKeyTable($type);
+            $transcodeTypeKey = $this->getTranscodeTypeKeyFromTypeName($type);
             
-            $options          = $this->DriverDataTypeTranscodes[$transcodeTypeKey];
+            $options          = $this->driverDataTypeTranscodes[$transcodeTypeKey];
         }
     
         // save field in args
@@ -649,31 +649,33 @@ class Migration extends Expression
     
     
     /**
-     * Get Transcode Type Key from table
+     * Get Transcode Type Key from type name
+     * Transcode table used : $driverDataTypeTranscodes
      *
      * @param string $type field type
      *
      * @return string
      */
-    protected function getTranscodeTypeKeyTable($type)
+    protected function getTranscodeTypeKeyFromTypeName($type)
     {
-        foreach ($this->DriverDataTypeTranscodes as $key => $options) {
+        foreach ($this->driverDataTypeTranscodes as $key => $options) {
             if ($options['type'] === $type) {
                 return $key;
             }
         }
         
-        return $this->DSQLDataTypeTranscodeDefault;
+        return $this->dataTypeTranscodeDefault;
     }
     
     /**
-     * Get Transcode Type Key from Model Field
+     * Get Transcode Type Key from Field
+     * Transcode table used : $dataTypeTranscodes
      *
      * @param \atk4\data\Field $field DSQL field
      *
      * @return string
      */
-    protected function getTranscodeTypeKeyDSQL($field)
+    protected function getTranscodeTypeKeyFromField($field)
     {
         if ($field->reference instanceof Reference_One) {
             
@@ -682,16 +684,16 @@ class Migration extends Expression
             
             if($referenceField->type === null)
             {
-                return $this->DSQLDataTypeTranscodes['integer'];
+                return $this->dataTypeTranscodes['integer'];
             }
             
             $field = $referenceField;
         }
         
-        if (isset($field->type) && isset($this->DSQLDataTypeTranscodes[$field->type])) {
-            return $this->DSQLDataTypeTranscodes[$field->type];
+        if (isset($field->type) && isset($this->dataTypeTranscodes[$field->type])) {
+            return $this->dataTypeTranscodes[$field->type];
         }
         
-        return $this->DSQLDataTypeTranscodeDefault;
+        return $this->dataTypeTranscodeDefault;
     }
 }

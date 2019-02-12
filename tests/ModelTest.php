@@ -39,6 +39,7 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
 	        ->field('en', ['type'=>'enum'])
 	
 	        ->create();
+        
         $this->db->dsql()->table('user')
             ->set([
                 'id'  => 1,
@@ -187,5 +188,19 @@ class TestUser extends \atk4\data\Model
         $this->addField('password', ['type'=>'password']);
         $this->addField('is_admin', ['type'=>'boolean']);
         $this->addField('notes', ['type'=>'text']);
+        $this->hasOne('test', TestUserReferenceOne::class);
+    }
+}
+
+
+class TestUserReferenceOne extends TestUser
+{
+    public $table = 'user_one';
+    
+    public function init()
+    {
+        parent::init();
+        
+        $this->addField('name');
     }
 }

@@ -38,7 +38,7 @@ class SQLite extends \atk4\schema\Migration
      * array is based on https://github.com/ikkez/f3-schema-builder/blob/master/lib/db/sql/schema.php
      * trasformed with https://gist.github.com/abbadon1334/cd5394ccc8bf0b411c7d75a60215578e
      */
-    public $DriverDataTypeTranscodes
+    public $driverDataTypeTranscodes
         = [
             'BOOLEAN'    => ['type' => 'BOOLEAN'],
             'INT4'       => ['type' => 'integer', 'len' => 11],
