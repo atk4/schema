@@ -30,9 +30,28 @@ namespace atk4\schema\Migration;
 
 class SQLite extends \atk4\schema\Migration
 {
+    
     /** @var string Expression to create primary key */
     public $primary_key_expr = 'integer primary key autoincrement';
-
+    
+    /** @var array Datatypes to decode driver specific type and len of field
+     * array is based on https://github.com/ikkez/f3-schema-builder/blob/master/lib/db/sql/schema.php
+     * trasformed with https://gist.github.com/abbadon1334/cd5394ccc8bf0b411c7d75a60215578e
+     */
+    public $DriverDataTypeTranscodes
+        = [
+            'BOOLEAN'    => ['type' => 'BOOLEAN'],
+            'INT4'       => ['type' => 'integer', 'len' => 11],
+            'FLOAT'      => ['type' => 'FLOAT'],
+            'DOUBLE'     => ['type' => 'decimal', 'len' => '15,6'],
+            'VARCHAR256' => ['type' => 'varchar', 'len' => 255],
+            'TEXT'       => ['type' => 'text'],
+            'DATE'       => ['type' => 'date'],
+            'DATETIME'   => ['type' => 'datetime'],
+            'TIMESTAMP'  => ['type' => 'DATETIME'],
+            'BLOB'       => ['type' => 'blob'],
+        ];
+    
     /**
      * Return database table descriptions.
      * DB engine specific.
@@ -45,27 +64,4 @@ class SQLite extends \atk4\schema\Migration
     {
         return $this->connection->expr('pragma table_info({})', [$table])->get();
     }
-	
-	/** @var array Datatypes to decode driver specific type and len of field
-	 * array is based on https://github.com/ikkez/f3-schema-builder/blob/master/lib/db/sql/schema.php
-	 * trasformed with https://gist.github.com/abbadon1334/cd5394ccc8bf0b411c7d75a60215578e
-	 */
-	public $DriverDataTypeTranscodes = [
-		'BOOLEAN'    => ['type' => 'BOOLEAN'],
-		//'INT1'       => ['type' => 'integer', 'len' => 4],
-		//'INT2'       => ['type' => 'integer', 'len' => 6],
-		'INT4'       => ['type' => 'integer', 'len' => 11],
-		//'INT8'       => ['type' => 'integer', 'len' => 20],
-		'FLOAT'      => ['type' => 'FLOAT'],
-		'DOUBLE'     => ['type' => 'decimal', 'len' => '15,6'],
-		//'VARCHAR128' => ['type' => 'varchar', 'len' => 128],
-		'VARCHAR256' => ['type' => 'varchar', 'len' => 255],
-		//'VARCHAR512' => ['type' => 'varchar', 'len' => 512],
-		'TEXT'       => ['type' => 'text'],
-		//'LONGTEXT'   => ['type' => 'text'],
-		'DATE'       => ['type' => 'date'],
-		'DATETIME'   => ['type' => 'datetime'],
-		'TIMESTAMP'  => ['type' => 'DATETIME'],
-		'BLOB'       => ['type' => 'blob'],
-	];
 }

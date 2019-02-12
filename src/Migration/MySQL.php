@@ -30,6 +30,29 @@ namespace atk4\schema\Migration;
 
 class MySQL extends \atk4\schema\Migration
 {
+    
+    /** @var string Expression to create primary key */
+    public $primary_key_expr = 'integer primary key auto_increment';
+    
+    /** @var array Datatypes to decode driver specific type and len of field
+     * array is based on https://github.com/ikkez/f3-schema-builder/blob/master/lib/db/sql/schema.php
+     * trasformed with https://gist.github.com/abbadon1334/cd5394ccc8bf0b411c7d75a60215578e
+     */
+    public $DriverDataTypeTranscodes
+        = [
+            'BOOLEAN'    => ['type' => 'tinyint', 'len' => 1],
+            'INT4'       => ['type' => 'int', 'len' => 11],
+            'FLOAT'      => ['type' => 'FLOAT'],
+            'DOUBLE'     => ['type' => 'decimal', 'len' => '18,6'],
+            'VARCHAR256' => ['type' => 'varchar', 'len' => 255],
+            'TEXT'       => ['type' => 'text'],
+            'TIME'       => ['type' => 'time'],
+            'DATE'       => ['type' => 'date'],
+            'DATETIME'   => ['type' => 'datetime'],
+            'TIMESTAMP'  => ['type' => 'timestamp'],
+            'BLOB'       => ['type' => 'blob'],
+        ];
+    
     /**
      * Field, table and alias name escaping symbol.
      * By SQL Standard it's double quote, but MySQL uses backtick.
@@ -37,10 +60,7 @@ class MySQL extends \atk4\schema\Migration
      * @var string
      */
     protected $escape_char = '`';
-
-    /** @var string Expression to create primary key */
-    public $primary_key_expr = 'integer primary key auto_increment';
-
+    
     /**
      * Return database table descriptions.
      * DB engine specific.
@@ -54,43 +74,18 @@ class MySQL extends \atk4\schema\Migration
         if (!$this->connection->expr('show tables like []', [$table])->get()) {
             return []; // no such table
         }
-
+        
         $result = [];
-
+        
         foreach ($this->connection->expr('describe {}', [$table]) as $row) {
-            $row2 = [];
+            $row2         = [];
             $row2['name'] = $row['Field'];
-            $row2['pk'] = $row['Key'] == 'PRI';
+            $row2['pk']   = $row['Key'] == 'PRI';
             $row2['type'] = preg_replace('/\(.*/', '', $row['Type']);
-
+            
             $result[] = $row2;
         }
-
+        
         return $result;
     }
-	
-	/** @var array Datatypes to decode driver specific type and len of field
-	 * array is based on https://github.com/ikkez/f3-schema-builder/blob/master/lib/db/sql/schema.php
-	 * trasformed with https://gist.github.com/abbadon1334/cd5394ccc8bf0b411c7d75a60215578e
-	 */
-	public $DriverDataTypeTranscodes = [
-		'BOOLEAN'    => ['type' => 'tinyint','len' => 1],
-		//'INT1'       => ['type' => 'boolean'],
-		//'INT2'       => ['type' => 'smallint', 'len' => 6],
-		//'INT4'       => ['type' => 'int', 'len' => 11],
-		'INT4'       => ['type' => 'int', 'len' => 11],
-		//'INT8'       => ['type' => 'bigint', 'len' => 20],
-		'FLOAT'      => ['type' => 'FLOAT'],
-		'DOUBLE'     => ['type' => 'decimal', 'len' => '18,6'],
-		//'VARCHAR128' => ['type' => 'varchar', 'len' => 128],
-		'VARCHAR256' => ['type' => 'varchar', 'len' => 255],
-		//'VARCHAR512' => ['type' => 'varchar', 'len' => 512],
-		'TEXT'       => ['type' => 'text'],
-		//'LONGTEXT'   => ['type' => 'LONGTEXT'],
-		'TIME'       => ['type' => 'time'],
-		'DATE'       => ['type' => 'date'],
-		'DATETIME'   => ['type' => 'datetime'],
-		'TIMESTAMP'  => ['type' => 'timestamp'],
-		'BLOB'       => ['type' => 'blob']
-	];
 }

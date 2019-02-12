@@ -3,6 +3,7 @@
 namespace atk4\schema;
 
 use atk4\core\Exception;
+use atk4\data\Reference_One;
 use atk4\dsql\Expression;
 
 class Migration extends Expression
@@ -31,49 +32,50 @@ class Migration extends Expression
 
     /** @var string Expression to create primary key */
     public $primary_key_expr = 'integer primary key autoincrement';
-		
-	/** @var array Datatypes to decode DSQL specific type and len of field
-	 *
-	 * definition of Field type attribute from \atk4\data\Field.
-	 *
-	 * Values are: 'string', 'text', 'boolean', 'integer', 'money', 'float',
-	 *             'date', 'datetime', 'time', 'array', 'object'.
-	 *
-	 * Can also be set to unspecified type for your own custom handling.
-	 *
-	 * add : double, password
-	 *
-	 */
-	public $DSQLDataTypeTranscodes
-		= [
-			'boolean'  => 'BOOLEAN',
-			'integer'  => 'INT4',
-			'string'   => 'VARCHAR256',
-			'password' => 'VARCHAR256',
-			'double'   => 'DOUBLE',
-			'float'    => 'FLOAT',
-			'money'    => 'FLOAT',
-			'date'     => 'DATE',
-			'datetime' => 'DATETIME',
-			'time'     => 'TIME',
-			'text'     => 'TEXT',
-			'array'    => 'TEXT',
-			'object'   => 'TEXT',
-		];
-	
-	/**
-	 * @var string if no transcode match fallaback to default
-	 *
-	 * changed to text because is better to have more space than 256 char
-	 * i had a problem storing EXIFData serialized
-	 */
-	public $DSQLDataTypeTranscodeDefault = 'TEXT';
-	
-	/**
-	 * @var array Datatypes to decode driver specific type and len of field
-	 * is defined in the extended Migration class
-	 */
-	public $DriverDataTypeTranscodes = [];
+    
+    /** @var array Datatypes to decode DSQL specific type and len of field
+     *
+     * definition of Field type attribute from \atk4\data\Field.
+     *
+     * Values are: 'string', 'text', 'boolean', 'integer', 'money', 'float',
+     *             'date', 'datetime', 'time', 'array', 'object'.
+     *
+     * Can also be set to unspecified type for your own custom handling.
+     *
+     * add : double, password
+     *
+     */
+    public $DSQLDataTypeTranscodes
+        = [
+            'boolean'  => 'BOOLEAN',
+            'integer'  => 'INT4',
+            'string'   => 'VARCHAR256',
+            'password' => 'VARCHAR256',
+            'double'   => 'DOUBLE',
+            'float'    => 'FLOAT',
+            'money'    => 'FLOAT',
+            'date'     => 'DATE',
+            'datetime' => 'DATETIME',
+            'time'     => 'TIME',
+            'text'     => 'TEXT',
+            'array'    => 'TEXT',
+            'object'   => 'INT4',
+        ];
+    
+    /**
+     * @var string if no transcode match fallaback to default
+     *
+     * changed to text because is better to have more space than 256 char
+     * i had a problem storing EXIFData serialized
+     */
+    public $DSQLDataTypeTranscodeDefault = 'TEXT';
+    
+    /**
+     * @var array Datatypes to decode driver specific type and len of field
+     * is defined in the extended Migration class
+     */
+    public $DriverDataTypeTranscodes = [];
+    
     /**
      * Create new migration.
      *
@@ -137,10 +139,10 @@ class Migration extends Expression
                 $this->id($field->actual ?: $field->short_name);
                 continue;
             }
-		
-	        $transcodeTypeKey = $this->getTranscodeTypeKeyDSQL($field);
-	
-	        $this->field($field->actual ?: $field->short_name, ['transcode_key' => $transcodeTypeKey]);
+            
+            $transcodeTypeKey = $this->getTranscodeTypeKeyDSQL($field);
+            
+            $this->field($field->actual ?: $field->short_name, ['transcode_key' => $transcodeTypeKey]);
         }
 
         return $m;
@@ -468,14 +470,14 @@ class Migration extends Expression
                 $this->id($row['name']);
                 continue;
             }
-	
-	        $type = strtok($row['type'], '(');
-         
-	        // get transcode key from Drivers DataTypeTrancode
-	        $transcodeTypeKey = $this->getTranscodeTypeKeyTable($type);
-	
-	        // call field with options 'transcode_key' to know is an internal call
-	        $this->field($row['name'], ['transcode_key' => $transcodeTypeKey]);
+    
+            $type = strtok($row['type'], '(');
+            
+            // get transcode key from Drivers DataTypeTrancode
+            $transcodeTypeKey = $this->getTranscodeTypeKeyTable($type);
+    
+            // call field with options 'transcode_key' to know is an internal call
+            $this->field($row['name'], ['transcode_key' => $transcodeTypeKey]);
         }
 
         return $has_fields;
@@ -519,18 +521,18 @@ class Migration extends Expression
      */
     public function field($name, $options = [])
     {
-	    // is is set is internal call
-	    if (isset($options['transcode_key'])) {
-		    $options = $this->DriverDataTypeTranscodes[$options['transcode_key']];
-	    }
-	    else {
-		    // is is call from outside, need to normalize
-		    $type = isset($options['type']) ? $options['type'] : '';
-		
-		    $transcodeTypeKey = $this->getTranscodeTypeKeyTable($type);
-		    $options = $this->DriverDataTypeTranscodes[$transcodeTypeKey];
-	    }
-	    
+        // is is set is internal call
+        if (isset($options['transcode_key'])) {
+            $options = $this->DriverDataTypeTranscodes[$options['transcode_key']];
+        } else {
+            // is is call from outside, need to normalize
+            $type = isset($options['type']) ? $options['type'] : '';
+        
+            $transcodeTypeKey = $this->getTranscodeTypeKeyTable($type);
+            
+            $options          = $this->DriverDataTypeTranscodes[$transcodeTypeKey];
+        }
+    
         // save field in args
         $this->_set_args('field', $name, $options);
 
@@ -644,41 +646,52 @@ class Migration extends Expression
             $this->args[$what][$alias] = $value;
         }
     }
-	
-	
-	/**
-	 * Get Transcode Type Key from table
-	 *
-	 * @param string $type field type
-	 *
-	 * @return string
-	 */
-	protected function getTranscodeTypeKeyTable($type)
-	{
-		foreach ($this->DriverDataTypeTranscodes as $key => $options)
-		{
-			if ($options['type'] === $type) {
-				return $key;
-			}
-		}
-		
-		return $this->DSQLDataTypeTranscodeDefault;
-	}
-	
-	/**
-	 * Get Transcode Type Key from Model Field
-	 *
-	 * @param \atk4\data\Field $field DSQL field
-	 *
-	 * @return string
-	 */
-	protected function getTranscodeTypeKeyDSQL($field)
-	{
-		if (isset($field->type) && isset($this->DSQLDataTypeTranscode[$field->type]))
-		{
-			return $this->DSQLDataTypeTranscodes[$field->type];
-		}
-		
-		return $this->DSQLDataTypeTranscodeDefault;
-	}
+    
+    
+    /**
+     * Get Transcode Type Key from table
+     *
+     * @param string $type field type
+     *
+     * @return string
+     */
+    protected function getTranscodeTypeKeyTable($type)
+    {
+        foreach ($this->DriverDataTypeTranscodes as $key => $options) {
+            if ($options['type'] === $type) {
+                return $key;
+            }
+        }
+        
+        return $this->DSQLDataTypeTranscodeDefault;
+    }
+    
+    /**
+     * Get Transcode Type Key from Model Field
+     *
+     * @param \atk4\data\Field $field DSQL field
+     *
+     * @return string
+     */
+    protected function getTranscodeTypeKeyDSQL($field)
+    {
+        if ($field->reference instanceof Reference_One) {
+            
+            $referenceFieldID = $field->reference->owner->id_field;
+            $referenceField = $field->reference->owner->elements[$referenceFieldID];
+            
+            if($referenceField->type === null)
+            {
+                return $this->DSQLDataTypeTranscodes['integer'];
+            }
+            
+            $field = $referenceField;
+        }
+        
+        if (isset($field->type) && isset($this->DSQLDataTypeTranscodes[$field->type])) {
+            return $this->DSQLDataTypeTranscodes[$field->type];
+        }
+        
+        return $this->DSQLDataTypeTranscodeDefault;
+    }
 }
