@@ -33,4 +33,21 @@ class MigratorConsole extends \atk4\ui\Console
             $c->notice('Done with migration');
         });
     }
+    
+    /**
+     * Single file creation of ClassFile using DB Table
+     */
+    public function createModelClass(Persistence_SQL $connection, $tableName, $futureModelName, $id_field = 'id', $ClassNamespace = '\Your\Project\Models')
+    {
+        $this->set(function ($c) use ($connection, $tableName, $futureModelName, $id_field, $ClassNamespace) {
+    
+            $c->notice('Start create class for table :' . $tableName);
+    
+            $m = new \atk4\schema\Migration\MySQL($connection);
+    
+            $output = $m->createModelFromTable($tableName, $futureModelName, $id_field, $ClassNamespace);
+    
+            $c->debug($output);
+        });
+    }
 }

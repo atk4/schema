@@ -696,4 +696,58 @@ class Migration extends Expression
         
         return $this->dataTypeTranscodeDefault;
     }
+    
+    
+    public function createModelFromTable($tableName, $futureModelName, $id_field = 'id', $ClassNamespace = '\Your\Project\Models')
+    {
+    
+        $PHP = <<<PHP
+<?php
+
+namespace {$ClassNamespace};
+
+class {$futureModelName} extends \atk4\data\Model
+{
+    /** @var string \$table table of the model */
+    public \$table = "{$tableName}";
+    {__ID_FIELD__}
+    
+    public function init()
+    {
+        parent::init();
+        
+{__FIELDS__}
+    }
+}
+PHP;
+        
+        $this->importTable($tableName);
+        
+        $replace = [
+            '{__ID_FIELD__}' => $id_field === 'id' ? '' : '/** @var string $id_field custom field id of the model */' . PHP_EOL . '        public $id_field = "' . $id_field . '"',
+            '{__FIELDS__}' => ''
+        ];
+        
+        foreach($this->args['field'] as $fieldName => $options)
+        {
+            $transcodeTypeKey = $this->getTranscodeTypeKeyFromTypeName($options['type']);
+    
+            $fieldType = $this->getTranscodeTypeKeyFromTypeName($this->dataTypeTranscodeDefault);
+    
+            foreach($this->dataTypeTranscodes as $type => $transcode)
+            {
+                if($transcodeTypeKey === $transcode)
+                {
+                    $fieldType = $type;
+                    break;
+                }
+            }
+    
+            if($id_field==$fieldName) continue;
+    
+            $replace['{__FIELDS__}'].= '        $this->addField("' . $fieldName . '",["type"=>"' . $fieldType .'"]);' . PHP_EOL;
+        }
+        
+        return str_replace(array_keys($replace),array_values($replace),$PHP);
+    }
 }

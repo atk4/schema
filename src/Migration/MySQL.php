@@ -42,7 +42,7 @@ class MySQL extends \atk4\schema\Migration
         = [
             'BOOLEAN'    => ['type' => 'tinyint', 'len' => 1],
             'INT4'       => ['type' => 'int', 'len' => 11],
-            'FLOAT'      => ['type' => 'FLOAT'],
+            'FLOAT'      => ['type' => 'float'],
             'DOUBLE'     => ['type' => 'decimal', 'len' => '18,6'],
             'VARCHAR256' => ['type' => 'varchar', 'len' => 255],
             'TEXT'       => ['type' => 'text'],
