@@ -698,6 +698,16 @@ class Migration extends Expression
     }
     
     
+    /**
+     * Create Model Class php file content based on storage table
+     *
+     * @param        $tableName
+     * @param        $futureModelName
+     * @param string $id_field
+     * @param string $ClassNamespace
+     *
+     * @return mixed
+     */
     public function createModelFromTable($tableName, $futureModelName, $id_field = 'id', $ClassNamespace = '\Your\Project\Models')
     {
     
