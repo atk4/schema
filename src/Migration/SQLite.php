@@ -40,15 +40,16 @@ class SQLite extends \atk4\schema\Migration
      */
     public $driverDataTypeTranscodes
         = [
-            'BOOLEAN'    => ['type' => 'BOOLEAN'],
+            'BOOLEAN'    => ['type' => 'boolean'],
             'INT4'       => ['type' => 'integer', 'len' => 11],
-            'FLOAT'      => ['type' => 'FLOAT'],
+            'FLOAT'      => ['type' => 'float'],
             'DOUBLE'     => ['type' => 'decimal', 'len' => '15,6'],
             'VARCHAR256' => ['type' => 'varchar', 'len' => 255],
             'TEXT'       => ['type' => 'text'],
             'DATE'       => ['type' => 'date'],
             'DATETIME'   => ['type' => 'datetime'],
-            'TIMESTAMP'  => ['type' => 'DATETIME'],
+            'TIME'       => ['type' => 'time'],
+            'TIMESTAMP'  => ['type' => 'datetime'],
             'BLOB'       => ['type' => 'blob'],
         ];
     
