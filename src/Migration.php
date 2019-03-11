@@ -5,9 +5,6 @@ namespace atk4\schema;
 use atk4\core\Exception;
 use atk4\data\Reference_One;
 use atk4\dsql\Expression;
-use Kint\Kint;
-use Kint\Parser\BlacklistPlugin;
-use Kint\Utils;
 
 class Migration extends Expression
 {
