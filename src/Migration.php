@@ -5,6 +5,9 @@ namespace atk4\schema;
 use atk4\core\Exception;
 use atk4\data\Reference_One;
 use atk4\dsql\Expression;
+use Kint\Kint;
+use Kint\Parser\BlacklistPlugin;
+use Kint\Utils;
 
 class Migration extends Expression
 {
@@ -677,11 +680,12 @@ class Migration extends Expression
      */
     protected function getTranscodeTypeKeyFromField($field)
     {
+        // if reference One check field type
         if ($field->reference instanceof Reference_One) {
             
-            $referenceFieldID = $field->reference->owner->id_field;
-            $referenceField = $field->reference->owner->elements[$referenceFieldID];
+            $referenceField = $field->reference;
             
+            // if null ?!? set default type integer
             if($referenceField->type === null)
             {
                 return $this->dataTypeTranscodes['integer'];
@@ -708,7 +712,7 @@ class Migration extends Expression
      *
      * @return mixed
      */
-    public function createModelFromTable($tableName, $futureModelName, $id_field = 'id', $ClassNamespace = '\Your\Project\Models')
+    public function createModelFromTable($tableName, $futureModelName, $id_field = 'id', $ClassNamespace = 'Your\Project\Models')
     {
     
         $PHP = <<<PHP
@@ -740,7 +744,7 @@ PHP;
         
         foreach($this->args['field'] as $fieldName => $options)
         {
-            $transcodeTypeKey = $this->getTranscodeTypeKeyFromTypeName($options['type']);
+            $transcodeTypeKey = $this->getTranscodeTypeKeyFromTypeName($options['type'] ?? '');
     
             $fieldType = $this->getTranscodeTypeKeyFromTypeName($this->dataTypeTranscodeDefault);
     
