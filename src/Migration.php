@@ -680,15 +680,13 @@ class Migration extends Expression
         // if reference One check field type
         if ($field->reference instanceof Reference_One) {
             
-            $referenceField = $field->reference;
+            $field = $field->reference;
             
             // if null ?!? set default type integer
-            if($referenceField->type === null)
+            if($field->type === null)
             {
                 return $this->dataTypeTranscodes['integer'];
             }
-            
-            $field = $referenceField;
         }
         
         if (isset($field->type) && isset($this->dataTypeTranscodes[$field->type])) {
