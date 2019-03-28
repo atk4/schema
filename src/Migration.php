@@ -46,12 +46,12 @@ class Migration extends Expression
             $this->connection = $source;
 
             return;
-        } elseif ($source instanceof \atk4\data\Persistence_SQL) {
+        } elseif ($source instanceof \atk4\data\Persistence_SQL || $source instanceof \atk4\data\Persistence\SQL) {
             $this->connection = $source->connection;
 
             return;
         } elseif ($source instanceof \atk4\data\Model) {
-            if ($source->persistence && $source->persistence instanceof \atk4\data\Persistence_SQL) {
+            if ($source->persistence && ($source->persistence instanceof \atk4\data\Persistence_SQL || $source->persistence instanceof \atk4\data\Persistence\SQL)) {
                 $this->connection = $source->persistence->connection;
 
                 $this->setModel($source);
