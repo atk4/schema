@@ -46,7 +46,7 @@ class Migration extends Expression
             $this->connection = $source;
 
             return;
-        } elseif ($source instanceof \atk4\data\Persistence_SQL || $source instanceof \atk4\data\Persistence\SQL ) {
+        } elseif ($source instanceof \atk4\data\Persistence_SQL || $source instanceof \atk4\data\Persistence\SQL) {
             $this->connection = $source->connection;
 
             return;
