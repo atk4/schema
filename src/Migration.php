@@ -373,15 +373,14 @@ class Migration extends Expression
      */
     public function getModelFieldType($type)
     {
-        if (substr($type, 0, 7) == 'varchar') {
+        $type = preg_replace('/\(.*/', '', strtolower($type)); // remove parenthesis
+
+        if (substr($type, 0, 7) == 'varchar' || substr($type, 0, 4) == 'char' || substr($type, 0, 4) == 'enum') {
             $type = null;
         }
 
-        if (substr($type, 0, 4) == 'char') {
-            $type = null;
-        }
-        if (substr($type, 0, 4) == 'enum') {
-            $type = null;
+        if ($type == 'tinyint') {
+            $type = 'boolean';
         }
 
         if ($type == 'int') {
@@ -389,22 +388,69 @@ class Migration extends Expression
         }
 
         if ($type == 'decimal') {
-            $type = 'integer';
+            $type = 'float';
         }
 
-        if ($type == 'tinyint') {
-            $type = 'boolean';
-        }
-
-        if ($type == 'longtext') {
-            $type = 'text';
-        }
-
-        if ($type == 'longblob') {
+        if ($type == 'longtext' || $type == 'longblob') {
             $type = 'text';
         }
 
         return $type;
+    }
+
+    /**
+     * Convert Agile Data field types to SQL field types.
+     *
+     * @param string $type    Agile Data field type
+     * @param array  $options More options
+     *
+     * @return string
+     */
+    public function getSQLFieldType($type, $options = [])
+    {
+        $type = strtolower($type);
+        $len = null;
+
+        switch ($type) {
+            case 'boolean':
+                $type = 'tinyint';
+                $len = 1;
+                break;
+            case 'integer':
+                $type = 'int';
+                break;
+            case 'money':
+                $type = 'decimal';
+                $len = '12,2';
+                break;
+            case 'float':
+                $type = 'decimal';
+                $len = '16,6';
+                break;
+            case 'date':
+            case 'datetime':
+                $type = 'date';
+                break;
+            case 'time':
+                $type = 'varchar';
+                $len = '8';
+                break;
+            case 'text':
+                $type = 'longtext';
+                break;
+            case 'array':
+            case 'object':
+                $type = 'longtext';
+                break;
+            default:
+                $type = 'varchar';
+                $len = '255';
+                break;
+        }
+
+        $len = $options['len'] ?? $len;
+
+        return $len !== null ? $type.'('.$len.')' : $type;
     }
 
     /**
@@ -535,18 +581,10 @@ class Migration extends Expression
      */
     protected function _render_one_field($field, $options)
     {
-        $name = isset($options['name']) ? $options['name'] : $field;
+        $name = $options['name'] ?? $field;
+        $type = $this->getSQLFieldType($options['type'] ?? null, $options);
 
-        $type = strtolower(isset($options['type']) ?
-                $options['type'] : 'varchar');
-        $type = preg_replace('/[^a-z0-9\(\),;\.]+/', '', $type);
-
-        $len = isset($options['len']) ?
-                $options['len'] :
-                ($type === 'varchar' ? 255 : null);
-
-        return $this->_escape($name).' '.$type.
-                ($len ? ('('.$len.')') : '');
+        return $this->_escape($name).' '.$type;
     }
 
     /**
