@@ -96,7 +96,7 @@ class Migration extends Expression
                 continue;
             }
 
-            $this->field($field->actual ?: $field->short_name);  // todo add options here
+            $this->field($field->actual ?: $field->short_name, ['type' => $field->type]);  // todo add more options here
         }
 
         return $m;
