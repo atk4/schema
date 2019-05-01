@@ -23,22 +23,43 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
         $m = $this->getMigration();
         $m->table('user')->id()
             ->field('foo')
-            ->field('bar', ['type'=>'integer'])
-            ->field('baz', ['type'=>'text'])
+            ->field('str', ['type'=>'string'])
+            ->field('bool', ['type'=>'boolean'])
+            ->field('int', ['type'=>'integer'])
+            ->field('mon', ['type'=>'money'])
+            ->field('flt', ['type'=>'float'])
+            ->field('date', ['type'=>'date'])
+            ->field('datetime', ['type'=>'datetime'])
+            ->field('time', ['type'=>'time'])
+            ->field('txt', ['type'=>'text'])
+            ->field('arr', ['type'=>'array'])
+            ->field('obj', ['type'=>'object'])
             ->create();
         $this->db->dsql()->table('user')
             ->set([
                 'id'  => 1,
-                'foo' => 'foovalue',
-                'bar' => 123,
-                'baz' => 'long text value',
+                'foo' => 'quite short value, max 255 characters',
+                'str' => 'quite short value, max 255 characters',
+                'bool' => true,
+                'int' => 123,
+                'mon' => 123.45,
+                'flt' => 123.456789,
+                'date' => (new \DateTime())->format('Y-m-d'),
+                'datetime' => (new \DateTime())->format('Y-m-d H:i:s'),
+                'time' => (new \DateTime())->format('H:i:s'),
+                'txt' => 'very long text value'.str_repeat("-=#", 1000), // 3000+ chars
+                'arr' => 'very long text value'.str_repeat("-=#", 1000), // 3000+ chars
+                'obj' => 'very long text value'.str_repeat("-=#", 1000), // 3000+ chars
             ])->insert();
 
         $m2 = $this->getMigration();
         $m2->importTable('user');
 
         $m2->mode('create');
-        $this->assertEquals($m->getDebugQuery(), $m2->getDebugQuery());
+
+        $q1 = preg_replace('/\([0-9,]*\)/i', '', $m->getDebugQuery()); // remove parentesis otherwise we can't differe money from float etc.
+        $q2 = preg_replace('/\([0-9,]*\)/i', '', $m2->getDebugQuery());
+        $this->assertEquals($q1, $q2);
     }
 
     public function testMigrateTable()
