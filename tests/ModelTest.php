@@ -37,19 +37,19 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
             ->create();
         $this->db->dsql()->table('user')
             ->set([
-                'id'  => 1,
-                'foo' => 'quite short value, max 255 characters',
-                'str' => 'quite short value, max 255 characters',
-                'bool' => true,
-                'int' => 123,
-                'mon' => 123.45,
-                'flt' => 123.456789,
-                'date' => (new \DateTime())->format('Y-m-d'),
+                'id'       => 1,
+                'foo'      => 'quite short value, max 255 characters',
+                'str'      => 'quite short value, max 255 characters',
+                'bool'     => true,
+                'int'      => 123,
+                'mon'      => 123.45,
+                'flt'      => 123.456789,
+                'date'     => (new \DateTime())->format('Y-m-d'),
                 'datetime' => (new \DateTime())->format('Y-m-d H:i:s'),
-                'time' => (new \DateTime())->format('H:i:s'),
-                'txt' => 'very long text value'.str_repeat("-=#", 1000), // 3000+ chars
-                'arr' => 'very long text value'.str_repeat("-=#", 1000), // 3000+ chars
-                'obj' => 'very long text value'.str_repeat("-=#", 1000), // 3000+ chars
+                'time'     => (new \DateTime())->format('H:i:s'),
+                'txt'      => 'very long text value'.str_repeat('-=#', 1000), // 3000+ chars
+                'arr'      => 'very long text value'.str_repeat('-=#', 1000), // 3000+ chars
+                'obj'      => 'very long text value'.str_repeat('-=#', 1000), // 3000+ chars
             ])->insert();
 
         $m2 = $this->getMigration();

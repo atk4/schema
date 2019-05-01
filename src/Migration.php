@@ -374,7 +374,7 @@ class Migration extends Expression
     public function getModelFieldType($type)
     {
         $type = preg_replace('/\(.*/', '', strtolower($type)); // remove parenthesis
-    
+
         if (substr($type, 0, 7) == 'varchar' || substr($type, 0, 4) == 'char' || substr($type, 0, 4) == 'enum') {
             $type = null;
         }
@@ -386,7 +386,7 @@ class Migration extends Expression
         if ($type == 'int') {
             $type = 'integer';
         }
-        
+
         if ($type == 'decimal') {
             $type = 'float';
         }
@@ -410,7 +410,7 @@ class Migration extends Expression
     {
         $type = strtolower($type);
         $len = null;
-    
+
         switch ($type) {
             case 'boolean':
                 $type = 'tinyint';
@@ -447,12 +447,12 @@ class Migration extends Expression
                 $len = '255';
                 break;
         }
-        
+
         $len = $options['len'] ?? $len;
 
         return $len !== null ? $type.'('.$len.')' : $type;
     }
-    
+
     /**
      * Import fields from database into migration field config.
      *
@@ -583,7 +583,7 @@ class Migration extends Expression
     {
         $name = $options['name'] ?? $field;
         $type = $this->getSQLFieldType($options['type'] ?? null, $options);
-        
+
         return $this->_escape($name).' '.$type;
     }
 
