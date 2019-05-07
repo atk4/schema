@@ -26,7 +26,9 @@
         "phpunit/phpunit": "<6",
         "phpunit/dbunit": ">=1.2",
         "phpunit/phpcov": "*",
-        "codeclimate/php-test-reporter": "*"
+        "codeclimate/php-test-reporter": "*",
+        "atk4/data": "^1.4",
+        "atk4/ui": "^1.6"
     },
     "autoload": {
         "psr-4": {"atk4\\schema\\":"src/"}
