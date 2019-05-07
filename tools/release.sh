@@ -49,14 +49,10 @@ done
 open "https://github.com/atk4/$product/compare/$prev_version...develop"
 
 composer remove --dev atk4/data
+composer remove --dev atk4/ui
 composer remove atk4/dsql
-composer remove atk4/core
-# Tweak our json file
-#sed -i "" -e '/atk4.*dev-develop/d' composer.json
-#rm -rf vendor/atk4/
-#composer update
 composer require atk4/dsql
-composer require --dev atk4/data
+composer require --dev atk4/data atk4/ui
 composer update
 
 ./vendor/phpunit/phpunit/phpunit  --no-coverage

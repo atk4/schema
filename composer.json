@@ -16,7 +16,7 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "atk4/dsql": "dev-develop"
+        "atk4/dsql": "^1.2"
     },
     "suggest": {
         "atk4/data": "*",
@@ -26,9 +26,7 @@
         "phpunit/phpunit": "<6",
         "phpunit/dbunit": ">=1.2",
         "phpunit/phpcov": "*",
-        "codeclimate/php-test-reporter": "*",
-        "atk4/data": "dev-develop",
-        "atk4/ui": "dev-develop"
+        "codeclimate/php-test-reporter": "*"
     },
     "autoload": {
         "psr-4": {"atk4\\schema\\":"src/"}
