@@ -16,10 +16,10 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "atk4/dsql": "^1.2"
+        "atk4/dsql": "dev-develop"
     },
     "suggest": {
-        "atk4/data": "*",
+        "atk4/dev-develop": "*",
         "jdorn/sql-formatter": "*"
     },
     "require-dev": {
