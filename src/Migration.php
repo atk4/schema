@@ -429,7 +429,7 @@ class Migration extends Expression
         $map = array_merge($this->defaultMapToPersistence, $this->mapToPersistence);
         $a = array_key_exists($type, $map) ? $map[$type] : $map[0];
 
-        return $a[0] . (count($a)>1 ? ' (' . implode(',', array_slice($a, 1)) . ')' : '');
+        return $a[0].(count($a) > 1 ? ' ('.implode(',', array_slice($a, 1)).')' : '');
     }
 
     /**

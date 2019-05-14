@@ -11,8 +11,8 @@ class PgSQL extends \atk4\schema\Migration
     /** @var array use this array in extended classes to overwrite or extend values of default mapping */
     public $mapToPersistence = [
         'boolean'   => ['boolean'],
-        'date'      => ['date'],
-        'datetime'  => ['timestamp'],
+        'date'      =>  ['date'],
+        'datetime'  =>  ['timestamp'],
         'time'      => ['time'],
     ];
 
