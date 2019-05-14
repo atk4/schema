@@ -23,6 +23,7 @@
         "jdorn/sql-formatter": "*"
     },
     "require-dev": {
+        "atk4/data": "dev-develop",
         "phpunit/phpunit": "<6",
         "phpunit/dbunit": ">=1.2",
         "phpunit/phpcov": "*",

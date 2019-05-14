@@ -57,7 +57,7 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
 
         $m2->mode('create');
 
-        $q1 = preg_replace('/\([0-9,]*\)/i', '', $m->getDebugQuery()); // remove parentesis otherwise we can't differe money from float etc.
+        $q1 = preg_replace('/\([0-9,]*\)/i', '', $m->getDebugQuery()); // remove parenthesis otherwise we can't differ money from float etc.
         $q2 = preg_replace('/\([0-9,]*\)/i', '', $m2->getDebugQuery());
         $this->assertEquals($q1, $q2);
     }
