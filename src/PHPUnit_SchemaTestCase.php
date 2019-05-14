@@ -2,7 +2,9 @@
 
 namespace atk4\schema;
 
+use atk4\data\Model;
 use atk4\data\Persistence;
+use atk4\dsql\Connection;
 
 // NOTE: This class should stay here in this namespace because other repos rely on it. For example, atk4\data tests
 class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
@@ -35,14 +37,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         $pass = isset($GLOBALS['DB_PASSWD']) ? $GLOBALS['DB_PASSWD'] : null;
 
         $this->db = Persistence::connect($this->dsn, $user, $pass);
-
-        // extract dirver
-        if ($this->debug) {
-            list($dumper_driver, $this->driver, $junk) = explode(':', $this->dsn, 3);
-        } else {
-            list($this->driver, $junk) = explode(':', $this->dsn, 2);
-        }
-        $this->driver = strtolower($this->driver);
+        $this->driver = $this->db->connection->driver;
     }
 
     public function tearDown()
@@ -55,28 +50,13 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
     /**
      * Create and return appropriate Migration object.
      *
-     * @param \atk4\dsql\Connection|\atk4\data\Persistence|\atk4\data\Model $m
+     * @param Connection|Persistence|Model $m
      *
      * @return Migration
      */
     public function getMigration($m = null)
     {
-        switch ($this->driver) {
-            case 'sqlite':
-                return new \atk4\schema\Migration\SQLite($m ?: $this->db);
-            case 'mysql':
-                return new \atk4\schema\Migration\MySQL($m ?: $this->db);
-            case 'pgsql':
-                return new \atk4\schema\Migration\PgSQL($m ?: $this->db);
-            case 'oci':
-                return new \atk4\schema\Migration\Oracle($m ?: $this->db);
-            default:
-                throw new \atk4\core\Exception([
-                    'Not sure which migration class to use for your DSN',
-                    'driver' => $this->driver,
-                    'dsn'    => $this->dsn,
-                ]);
-        }
+        return \atk4\schema\Migration::getMigration($m ?: $this->db);
     }
 
     /**
@@ -87,7 +67,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
      */
     public function dropTable($table)
     {
-        $this->db->connection->expr('drop table if exists {}', [$table])->execute();
+        $this->getMigration()->table($table)->drop();
     }
 
     /**
