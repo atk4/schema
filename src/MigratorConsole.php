@@ -29,7 +29,7 @@ class MigratorConsole extends \atk4\ui\Console
                     $p->add($model);
                 }
 
-                $m = new {$this->migrator_class}($model);
+                $m = new $this->migrator_class($model);
                 $result = $m->migrate();
 
                 $c->debug('  '.get_class($model).'.. '.$result);
