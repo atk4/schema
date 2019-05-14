@@ -32,6 +32,38 @@ class Migration extends Expression
     /** @var string Expression to create primary key */
     public $primary_key_expr = 'integer primary key autoincrement';
 
+    /** @var array Conversion mapping from Agile Data types to persistence types */
+    protected $defaultMapToPersistence = [
+        ['varchar', 255], // default
+        'boolean'   => ['tinyint', 1],
+        'integer'   => ['int'],
+        'money'     => ['decimal', 12, 2],
+        'float'     => ['decimal', 16, 6],
+        'date'      => ['date'],
+        'datetime'  => ['date'],
+        'time'      => ['varchar', 8],
+        'text'      => ['text'],
+        'array'     => ['text'],
+        'object'    => ['text'],
+    ];
+
+    /** @var array use this array in extended classes to overwrite or extend values of default mapping */
+    public $mapToPersistence = [];
+
+    /** @var array Conversion mapping from persistence types to Agile Data types */
+    protected $defaultMapToAgile = [
+        [null], // default
+        'tinyint'   => ['boolean'],
+        'int'       => ['integer'],
+        'decimal'   => ['float'],
+        'numeric'   => ['float'],
+        'date'      => ['datetime'],
+        'text'      => ['text'],
+    ];
+
+    /** @var array use this array in extended classes to overwrite or extend values of default mapping */
+    public $mapToAgile = [];
+
     /**
      * Create new migration.
      *
@@ -46,12 +78,12 @@ class Migration extends Expression
             $this->connection = $source;
 
             return;
-        } elseif ($source instanceof \atk4\data\Persistence_SQL || $source instanceof \atk4\data\Persistence\SQL) {
+        } elseif ($source instanceof \atk4\data\Persistence\SQL) {
             $this->connection = $source->connection;
 
             return;
         } elseif ($source instanceof \atk4\data\Model) {
-            if ($source->persistence && ($source->persistence instanceof \atk4\data\Persistence_SQL || $source->persistence instanceof \atk4\data\Persistence\SQL)) {
+            if ($source->persistence && ($source->persistence instanceof \atk4\data\Persistence\SQL)) {
                 $this->connection = $source->persistence->connection;
 
                 $this->setModel($source);
@@ -369,33 +401,17 @@ class Migration extends Expression
      *
      * @param string $type SQL field type
      *
-     * @return string
+     * @return string|null
      */
     public function getModelFieldType($type)
     {
-        $type = preg_replace('/\(.*/', '', strtolower($type)); // remove parenthesis
+        // remove parenthesis
+        $type = trim(preg_replace('/\(.*/', '', strtolower($type)));
 
-        if (substr($type, 0, 7) == 'varchar' || substr($type, 0, 4) == 'char' || substr($type, 0, 4) == 'enum') {
-            $type = null;
-        }
+        $map = array_merge($this->defaultMapToAgile, $this->mapToAgile);
+        $a = array_key_exists($type, $map) ? $map[$type] : $map[0];
 
-        if ($type == 'tinyint') {
-            $type = 'boolean';
-        }
-
-        if ($type == 'int') {
-            $type = 'integer';
-        }
-
-        if ($type == 'decimal') {
-            $type = 'float';
-        }
-
-        if ($type == 'longtext' || $type == 'longblob') {
-            $type = 'text';
-        }
-
-        return $type;
+        return $a[0];
     }
 
     /**
@@ -409,48 +425,11 @@ class Migration extends Expression
     public function getSQLFieldType($type, $options = [])
     {
         $type = strtolower($type);
-        $len = null;
 
-        switch ($type) {
-            case 'boolean':
-                $type = 'tinyint';
-                $len = 1;
-                break;
-            case 'integer':
-                $type = 'int';
-                break;
-            case 'money':
-                $type = 'decimal';
-                $len = '12,2';
-                break;
-            case 'float':
-                $type = 'decimal';
-                $len = '16,6';
-                break;
-            case 'date':
-            case 'datetime':
-                $type = 'date';
-                break;
-            case 'time':
-                $type = 'varchar';
-                $len = '8';
-                break;
-            case 'text':
-                $type = 'longtext';
-                break;
-            case 'array':
-            case 'object':
-                $type = 'longtext';
-                break;
-            default:
-                $type = 'varchar';
-                $len = '255';
-                break;
-        }
+        $map = array_merge($this->defaultMapToPersistence, $this->mapToPersistence);
+        $a = array_key_exists($type, $map) ? $map[$type] : $map[0];
 
-        $len = $options['len'] ?? $len;
-
-        return $len !== null ? $type.'('.$len.')' : $type;
+        return $a[0].(count($a) > 1 ? ' ('.implode(',', array_slice($a, 1)).')' : '');
     }
 
     /**

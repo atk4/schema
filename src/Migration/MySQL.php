@@ -15,6 +15,19 @@ class MySQL extends \atk4\schema\Migration
     /** @var string Expression to create primary key */
     public $primary_key_expr = 'integer primary key auto_increment';
 
+    /** @var array use this array in extended classes to overwrite or extend values of default mapping */
+    public $mapToPersistence = [
+        'text'      => ['longtext'],
+        'array'     => ['longtext'],
+        'object'    => ['longtext'],
+    ];
+
+    /** @var array use this array in extended classes to overwrite or extend values of default mapping */
+    public $mapToAgile = [
+        'longtext'  => ['text'],
+        'longblob'  => ['text'],
+    ];
+
     /**
      * Return database table descriptions.
      * DB engine specific.
