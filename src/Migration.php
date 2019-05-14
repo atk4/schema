@@ -3,10 +3,10 @@
 namespace atk4\schema;
 
 use atk4\core\Exception;
-use atk4\dsql\Connection;
-use atk4\dsql\Expression;
 use atk4\Data\Model;
 use atk4\data\Persistence;
+use atk4\dsql\Connection;
+use atk4\dsql\Expression;
 
 class Migration extends Expression
 {
@@ -121,8 +121,6 @@ class Migration extends Expression
             'source' => $source,
         ]);
     }
-
-
 
     /**
      * Create new migration.
