@@ -3,6 +3,9 @@
 namespace atk4\schema;
 
 use atk4\core\Exception;
+use atk4\Data\Model;
+use atk4\data\Persistence;
+use atk4\dsql\Connection;
 use atk4\dsql\Expression;
 
 class Migration extends Expression
@@ -18,7 +21,7 @@ class Migration extends Expression
         'rename' => 'rename table {old_table} to {table}',
     ];
 
-    /** @var \atk4\dsql\Connection Database connection */
+    /** @var Connection Database connection */
     public $connection;
 
     /**
@@ -65,47 +68,99 @@ class Migration extends Expression
     public $mapToAgile = [];
 
     /**
-     * Create new migration.
+     * Factory method to get correct Migration subclass object depending on connection given.
      *
-     * @param \atk4\dsql\Connection|\atk4\data\Persistence|\atk4\data\Model $source
-     * @param array                                                         $params
+     * @param Connection|Persistence|Model $source
+     * @param array                        $params
+     *
+     * @return Migration Subclass
      */
-    public function __construct($source, $params = [])
+    public static function getMigration($source, $params = [])
     {
-        parent::__construct($params);
+        $c = static::getConnection($source);
 
-        if ($source instanceof \atk4\dsql\Connection) {
-            $this->connection = $source;
+        switch ($c->driver) {
+            case 'sqlite':
+                return new Migration\SQLite($source, $params);
+            case 'mysql':
+                return new Migration\MySQL($source, $params);
+            case 'pgsql':
+                return new Migration\PgSQL($source, $params);
+            case 'oci':
+                return new Migration\Oracle($source, $params);
+            default:
+                throw new Exception([
+                    'Not sure which migration class to use for your DSN',
+                    'driver' => $c->driver,
+                    'source' => $source,
+                ]);
+        }
+    }
 
-            return;
-        } elseif ($source instanceof \atk4\data\Persistence\SQL) {
-            $this->connection = $source->connection;
-
-            return;
-        } elseif ($source instanceof \atk4\data\Model) {
-            if ($source->persistence && ($source->persistence instanceof \atk4\data\Persistence\SQL)) {
-                $this->connection = $source->persistence->connection;
-
-                $this->setModel($source);
-
-                return;
-            }
+    /**
+     * Static method to extract DB driver from Connection, Persistence or Model.
+     *
+     * @param Connection|Persistence|Model $source
+     */
+    public static function getConnection($source)
+    {
+        if ($source instanceof Connection) {
+            return $source;
+        } elseif ($source instanceof Persistence\SQL) {
+            return $source->connection;
+        } elseif (
+            $source instanceof Model
+            && $source->persistence
+            && ($source->persistence instanceof Persistence\SQL)
+        ) {
+            return $source->persistence->connection;
         }
 
-        throw new \atk4\core\Exception([
+        throw new Exception([
             'Source is specified incorrectly. Must be Connection, Persistence or initialized Model',
             'source' => $source,
         ]);
     }
 
     /**
+     * Create new migration.
+     *
+     * @param Connection|Persistence|Model $source
+     * @param array                        $params
+     */
+    public function __construct($source, $params = [])
+    {
+        parent::__construct($params);
+
+        $this->setSource($source);
+    }
+
+    /**
+     * Sets source of migration.
+     *
+     * @param Connection|Persistence|Model $source
+     */
+    public function setSource($source)
+    {
+        $this->connection = static::getConnection($source);
+
+        if (
+            $source instanceof Model
+            && $source->persistence
+            && ($source->persistence instanceof Persistence\SQL)
+        ) {
+            $this->setModel($source);
+        }
+    }
+
+    /**
      * Sets model.
      *
-     * @param \atk4\data\Model $m
+     * @param Model $m
      *
-     * @return \atk4\data\Model
+     * @return Model
      */
-    public function setModel(\atk4\data\Model $m)
+    public function setModel(Model $m)
     {
         $this->table($m->table);
 
@@ -308,14 +363,14 @@ class Migration extends Expression
      * Create rough model from current set of $this->args['fields']. This is not
      * ideal solution but is designed as a drop-in solution.
      *
-     * @param \atk4\data\Persistence $persistence
-     * @param string                 $table
+     * @param Persistence $persistence
+     * @param string      $table
      *
-     * @return \atk4\data\Model
+     * @return Model
      */
     public function createModel($persistence, $table = null)
     {
-        $m = new \atk4\data\Model([$persistence, 'table'=>$table ?: $this['table'] = $table]);
+        $m = new Model([$persistence, 'table'=>$table ?: $this['table'] = $table]);
 
         foreach ($this->_getFields() as $field => $options) {
             if ($field == 'id') {
@@ -385,7 +440,7 @@ class Migration extends Expression
      * Return database table descriptions.
      * DB engine specific.
      *
-     * @todo Convert to abstract function
+     * @todo Maybe convert to abstract function
      *
      * @param string $table
      *
