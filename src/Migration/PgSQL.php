@@ -1,4 +1,4 @@
-<?php
+<?php.
 
 namespace atk4\schema\Migration;
 
@@ -21,6 +21,7 @@ class PgSQL extends \atk4\schema\Migration
         'boolean'   => ['boolean'],
         'date'      => ['date'],
         'datetime'  => ['datetime'],
+        'timestamp' => ['datetime'],
         'time'      => ['time'],
     ];
 

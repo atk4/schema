@@ -43,7 +43,7 @@ class Migration extends Expression
         'money'     => ['decimal', 12, 2],
         'float'     => ['decimal', 16, 6],
         'date'      => ['date'],
-        'datetime'  => ['date'],
+        'datetime'  => ['datetime'],
         'time'      => ['varchar', 8],
         'text'      => ['text'],
         'array'     => ['text'],
@@ -60,7 +60,9 @@ class Migration extends Expression
         'int'       => ['integer'],
         'decimal'   => ['float'],
         'numeric'   => ['float'],
-        'date'      => ['datetime'],
+        'date'      => ['date'],
+        'datetime'  => ['datetime'],
+        'timestamp' => ['datetime'],
         'text'      => ['text'],
     ];
 
