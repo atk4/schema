@@ -1,4 +1,4 @@
-<?php.
+<?php
 
 namespace atk4\schema\Migration;
 
