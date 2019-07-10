@@ -166,12 +166,8 @@ class Migration extends Expression
     {
         $this->table($m->table);
 
-        foreach ($m->elements as $field) {
+        foreach ($m->getFields() as $field) {
             // ignore not persisted model fields
-            if (!$field instanceof \atk4\data\Field) {
-                continue;
-            }
-
             if ($field->never_persist) {
                 continue;
             }
