@@ -741,7 +741,7 @@ class Migration extends Expression
     }
 
     /**
-     * Create Model Class php file content based on storage table
+     * Create Model Class php file content based on storage table.
      *
      * @param string $table
      * @param string $model
