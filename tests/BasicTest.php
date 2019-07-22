@@ -2,7 +2,9 @@
 
 namespace atk4\schema\tests;
 
-class BasicTest extends \atk4\schema\PHPUnit_SchemaTestCase
+use atk4\schema\PHPUnit_SchemaTestCase;
+
+class BasicTest extends PHPUnit_SchemaTestCase
 {
     /**
      * Test constructor.
@@ -13,26 +15,21 @@ class BasicTest extends \atk4\schema\PHPUnit_SchemaTestCase
         $m = $this->getMigration();
         $m->table('user')->id()
             ->field('foo')
-            ->field('bar', ['type'=>'integer'])
-            ->field('baz', ['type'=>'text'])
-	
-	        ->field('bl', ['type'=>'boolean'])
-	        
-	        ->field('tm', ['type'=>'time'])
-            ->field('dt', ['type'=>'date'])
-            ->field('dttm', ['type'=>'datetime'])
-	
-	        ->field('dbl', ['type'=>'double'])
-	        ->field('fl', ['type'=>'float'])
-	        ->field('mn', ['type'=>'money'])
-	
-	        ->field('en', ['type'=>'enum'])
-	        
+            ->field('bar', ['type' => 'integer'])
+            ->field('baz', ['type' => 'text'])
+            ->field('bl', ['type' => 'boolean'])
+            ->field('tm', ['type' => 'time'])
+            ->field('dt', ['type' => 'date'])
+            ->field('dttm', ['type' => 'datetime'])
+            ->field('dbl', ['type' => 'double'])
+            ->field('fl', ['type' => 'float'])
+            ->field('mn', ['type' => 'money'])
+            ->field('en', ['type' => 'enum'])
             ->create();
 
         $m = $this->getMigration();
         $m->table('user')
-            ->newField('zed', ['type'=>'integer'])
+            ->newField('zed', ['type' => 'integer'])
             ->alter();
     }
 
@@ -49,26 +46,21 @@ class BasicTest extends \atk4\schema\PHPUnit_SchemaTestCase
         $m = $this->getMigration();
         $m->table('user')->id()
             ->field('foo')
-            ->field('bar', ['type'=>'integer'])
-            ->field('baz', ['type'=>'text'])
-	
-	        ->field('bl', ['type'=>'boolean'])
-	        
-	        ->field('tm', ['type'=>'time'])
-	        ->field('dt', ['type'=>'date'])
-	        ->field('dttm', ['type'=>'datetime'])
-	
-	        ->field('dbl', ['type'=>'double'])
-	        ->field('fl', ['type'=>'float'])
-	        ->field('mn', ['type'=>'money'])
-	
-	        ->field('en', ['type'=>'enum'])
-	
-	        ->create();
+            ->field('bar', ['type' => 'integer'])
+            ->field('baz', ['type' => 'text'])
+            ->field('bl', ['type' => 'boolean'])
+            ->field('tm', ['type' => 'time'])
+            ->field('dt', ['type' => 'date'])
+            ->field('dttm', ['type' => 'datetime'])
+            ->field('dbl', ['type' => 'double'])
+            ->field('fl', ['type' => 'float'])
+            ->field('mn', ['type' => 'money'])
+            ->field('en', ['type' => 'enum'])
+            ->create();
 
         $m = $this->getMigration();
         $m->table('user')
-            ->dropField('bar', ['type'=>'integer'])
+            ->dropField('bar', ['type' => 'integer'])
             ->alter();
     }
 }

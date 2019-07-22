@@ -28,12 +28,14 @@
 
 namespace atk4\schema\Migration;
 
-class SQLite extends \atk4\schema\Migration
+use atk4\schema\Migration;
+
+class SQLite extends Migration
 {
-    
+
     /** @var string Expression to create primary key */
     public $primary_key_expr = 'integer primary key autoincrement';
-    
+
     /** @var array Datatypes to decode driver specific type and len of field
      * array is based on https://github.com/ikkez/f3-schema-builder/blob/master/lib/db/sql/schema.php
      * trasformed with https://gist.github.com/abbadon1334/cd5394ccc8bf0b411c7d75a60215578e
@@ -52,7 +54,7 @@ class SQLite extends \atk4\schema\Migration
             'TIMESTAMP'  => ['type' => 'datetime'],
             'BLOB'       => ['type' => 'blob'],
         ];
-    
+
     /**
      * Return database table descriptions.
      * DB engine specific.
@@ -61,7 +63,7 @@ class SQLite extends \atk4\schema\Migration
      *
      * @return array
      */
-    public function describeTable($table)
+    public function describeTable(string $table) : array
     {
         return $this->connection->expr('pragma table_info({})', [$table])->get();
     }

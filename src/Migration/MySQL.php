@@ -28,12 +28,14 @@
 
 namespace atk4\schema\Migration;
 
-class MySQL extends \atk4\schema\Migration
+use atk4\schema\Migration;
+
+class MySQL extends Migration
 {
-    
+
     /** @var string Expression to create primary key */
     public $primary_key_expr = 'integer primary key auto_increment';
-    
+
     /** @var array Datatypes to decode driver specific type and len of field
      * array is based on https://github.com/ikkez/f3-schema-builder/blob/master/lib/db/sql/schema.php
      * trasformed with https://gist.github.com/abbadon1334/cd5394ccc8bf0b411c7d75a60215578e
@@ -52,7 +54,7 @@ class MySQL extends \atk4\schema\Migration
             'TIMESTAMP'  => ['type' => 'timestamp'],
             'BLOB'       => ['type' => 'blob'],
         ];
-    
+
     /**
      * Field, table and alias name escaping symbol.
      * By SQL Standard it's double quote, but MySQL uses backtick.
@@ -60,7 +62,7 @@ class MySQL extends \atk4\schema\Migration
      * @var string
      */
     protected $escape_char = '`';
-    
+
     /**
      * Return database table descriptions.
      * DB engine specific.
@@ -69,23 +71,23 @@ class MySQL extends \atk4\schema\Migration
      *
      * @return array
      */
-    public function describeTable($table)
+    public function describeTable(string $table) : array
     {
         if (!$this->connection->expr('show tables like []', [$table])->get()) {
             return []; // no such table
         }
-        
+
         $result = [];
-        
+
         foreach ($this->connection->expr('describe {}', [$table]) as $row) {
             $row2         = [];
             $row2['name'] = $row['Field'];
             $row2['pk']   = $row['Key'] == 'PRI';
             $row2['type'] = preg_replace('/\(.*/', '', $row['Type']);
-            
+
             $result[] = $row2;
         }
-        
+
         return $result;
     }
 }
