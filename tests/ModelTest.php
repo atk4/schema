@@ -92,6 +92,25 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
             ->field('baz')
             ->migrate();
     }
+
+    public function testCreateModel()
+    {
+        $this->dropTable('user');
+        (\atk4\schema\Migration::getMigration(new TestUser($this->db)))->migrate();
+
+
+        $m = $this->getMigration($this->db);
+        $user_model = $m->createModel($this->db, 'user');
+
+        $this->assertEquals([
+                'name',
+                'password',
+                'is_admin',
+                'notes'
+            ],
+            array_keys($user_model->getFields())
+        );
+    }
 }
 
 class TestUser extends \atk4\data\Model

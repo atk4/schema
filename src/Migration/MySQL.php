@@ -24,6 +24,7 @@ class MySQL extends \atk4\schema\Migration
 
     /** @var array use this array in extended classes to overwrite or extend values of default mapping */
     public $mapToAgile = [
+        0 => ['string'],
         'longtext'  => ['text'],
         'longblob'  => ['text'],
     ];
@@ -36,7 +37,7 @@ class MySQL extends \atk4\schema\Migration
      *
      * @return array
      */
-    public function describeTable($table)
+    public function describeTable(string $table) : array
     {
         if (!$this->connection->expr('show tables like []', [$table])->get()) {
             return []; // no such table

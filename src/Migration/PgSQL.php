@@ -33,7 +33,7 @@ class PgSQL extends \atk4\schema\Migration
      *
      * @return array
      */
-    public function describeTable($table)
+    public function describeTable(string $table) : array
     {
         $columns = $this->connection->expr('SELECT * FROM information_schema.COLUMNS WHERE TABLE_NAME = []', [$table])->get();
 
@@ -60,7 +60,7 @@ class PgSQL extends \atk4\schema\Migration
      *
      * @return string
      */
-    public function _render_statements()
+    public function _render_statements() :string
     {
         $result = [];
 

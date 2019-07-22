@@ -40,12 +40,13 @@ class User extends \atk4\data\Model
         $this->addField("password",["type"=>"string"]);
         $this->addField("is_admin",["type"=>"boolean"]);
         $this->addField("notes",["type"=>"text"]);
-        $this->addField("test_user_reference_one_id",["type"=>"integer"]);
+        $this->addField("test_has_one_id",["type"=>"integer"]);
+        $this->addField("test_has_one_string",["type"=>"string"]);
 
     }
 }';
 
-        $output = $Migration->createModelFromTable('user', 'User', 'id', '\Your\Project\Models');
+        $output = $Migration->getModelPHPCode('user', 'User', 'id', '\Your\Project\Models');
 
         $this->assertEquals($excepted, $output);
     }
@@ -65,11 +66,24 @@ class TestCreationUser extends Model
         $this->addField('password', ['type' => 'password']);
         $this->addField('is_admin', ['type' => 'boolean']);
         $this->addField('notes', ['type' => 'text']);
-        $this->hasOne('test_user_reference_one_id', TestCreationUserReferenceOne::class);
+
+        $this->addExpression('test_expression',['concat'=> ['name','notes']]);
+
+        // test has one with type integer
+        $this->hasOne('test_has_one_id', TestCreationUserReferenceOne::class);
+
+        // test has one with type string
+        $this->hasOne('test_has_one_string', [
+            TestCreationUserReferenceOne::class,
+            'their_field' => 'name'
+        ]);
+
+        // test has many
+        $this->hasMany('test_has_many', TestCreationUserReferenceOne::class);
     }
 }
 
-class TestCreationUserReferenceOne extends TestCreationUser
+class TestCreationUserReferenceOne extends Model
 {
 
     public $table = 'user_one';
@@ -78,6 +92,6 @@ class TestCreationUserReferenceOne extends TestCreationUser
     {
         parent::init();
 
-        $this->addField('name');
+        $this->addField('name',['type' => 'string']);
     }
 }
