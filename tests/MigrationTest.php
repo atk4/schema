@@ -52,10 +52,8 @@ class User extends \atk4\data\Model
     }
 }
 
-
 class TestCreationUser extends Model
 {
-
     public $table = 'user';
 
     public function init()
@@ -67,7 +65,7 @@ class TestCreationUser extends Model
         $this->addField('is_admin', ['type' => 'boolean']);
         $this->addField('notes', ['type' => 'text']);
 
-        $this->addExpression('test_expression',['concat'=> ['name','notes']]);
+        $this->addExpression('test_expression', ['concat'=> ['name', 'notes']]);
 
         // test has one with type integer
         $this->hasOne('test_has_one_id', TestCreationUserReferenceOne::class);
@@ -75,7 +73,7 @@ class TestCreationUser extends Model
         // test has one with type string
         $this->hasOne('test_has_one_string', [
             TestCreationUserReferenceOne::class,
-            'their_field' => 'name'
+            'their_field' => 'name',
         ]);
 
         // test has many
@@ -85,13 +83,12 @@ class TestCreationUser extends Model
 
 class TestCreationUserReferenceOne extends Model
 {
-
     public $table = 'user_one';
 
     public function init()
     {
         parent::init();
 
-        $this->addField('name',['type' => 'string']);
+        $this->addField('name', ['type' => 'string']);
     }
 }

@@ -81,7 +81,7 @@ class Migration extends Expression
      *
      * @return Migration Subclass
      */
-    public static function getMigration($source, $params = []) : Migration
+    public static function getMigration($source, $params = []) : self
     {
         $c = static::getConnection($source);
 
@@ -216,8 +216,7 @@ class Migration extends Expression
                 $property->setAccessible(true);
 
                 // get their_field id
-                $reference_their_field  = $property->getValue($field->reference);
-                $reference_id_field     = $field->reference->owner->id_field;
+                $reference_their_field = $property->getValue($field->reference);
                 $their_field = $reference_their_field ?? $field->reference->owner->id_field;
 
                 $refModelClass = $field->reference->model;
@@ -552,7 +551,7 @@ class Migration extends Expression
      *
      * @return string|null
      */
-    public function getSQLFieldType(?string $type, ?array $options=null) :?string
+    public function getSQLFieldType(?string $type, ?array $options = null) :?string
     {
         $type = strtolower($type);
 
@@ -753,7 +752,8 @@ class Migration extends Expression
      *
      * @return string
      */
-    public function getModelPHPCode(string $table, string $model, string $id_field = 'id', string $namespace = '\Your\Project\Models') :string {
+    public function getModelPHPCode(string $table, string $model, string $id_field = 'id', string $namespace = '\Your\Project\Models') :string
+    {
         $PHP = <<<PHP
 <?php
 
@@ -776,7 +776,7 @@ PHP;
         $this->importTable($table);
 
         $replace = [
-            '{__ID_FIELD__}' => $id_field === 'id' ? '' : '/** @var string $id_field custom field id of the model */' . PHP_EOL . '        public $id_field = "' . $id_field . '"',
+            '{__ID_FIELD__}' => $id_field === 'id' ? '' : '/** @var string $id_field custom field id of the model */'.PHP_EOL.'        public $id_field = "'.$id_field.'"',
             '{__FIELDS__}'   => '',
         ];
 
@@ -787,7 +787,7 @@ PHP;
 
             $fieldType = $options['type'] ?? null;
 
-            $replace['{__FIELDS__}'] .= '        $this->addField("' . $fieldName . '",["type"=>"' . $fieldType . '"]);' . PHP_EOL;
+            $replace['{__FIELDS__}'] .= '        $this->addField("'.$fieldName.'",["type"=>"'.$fieldType.'"]);'.PHP_EOL;
         }
 
         return str_replace(array_keys($replace), array_values($replace), $PHP);

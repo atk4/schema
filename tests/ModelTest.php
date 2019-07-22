@@ -98,7 +98,6 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
         $this->dropTable('user');
         (\atk4\schema\Migration::getMigration(new TestUser($this->db)))->migrate();
 
-
         $m = $this->getMigration($this->db);
         $user_model = $m->createModel($this->db, 'user');
 
@@ -106,7 +105,7 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
                 'name',
                 'password',
                 'is_admin',
-                'notes'
+                'notes',
             ],
             array_keys($user_model->getFields())
         );

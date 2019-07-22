@@ -12,7 +12,7 @@ class SchemaTestcaseTest extends PHPUnit_SchemaTestCase
             'user' => [
                 ['name' => 'John', 'surname' => 'Smith'],
                 ['name' => 'Steve', 'surname' => 'Jobs'],
-            ]
+            ],
         ]);
 
         $q2 = $this->getDB('user');

@@ -10,6 +10,7 @@ class SQLite extends \atk4\schema\Migration
     public $mapToAgile = [
         0 => ['string'],
     ];
+
     /**
      * Return database table descriptions.
      * DB engine specific.
