@@ -2,21 +2,14 @@
 
 namespace atk4\schema;
 
-use atk4\core\Exception;
-use atk4\core\PHPUnit_AgileTestCase;
 use atk4\data\Model;
 use atk4\data\Persistence;
 use atk4\dsql\Connection;
-use atk4\schema\Migration\MySQL;
-use atk4\schema\Migration\Oracle;
-use atk4\schema\Migration\PgSQL;
-use atk4\schema\Migration\SQLite;
-use DateTime;
 
 // NOTE: This class should stay here in this namespace because other repos rely on it. For example, atk4\data tests
-class PHPUnit_SchemaTestCase extends PHPUnit_AgileTestCase
+class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 {
-    /** @var Persistence Persistence instance */
+    /** @var \atk4\data\Persistence Persistence instance */
     public $db;
 
     /** @var array Array of database table names */
@@ -24,10 +17,12 @@ class PHPUnit_SchemaTestCase extends PHPUnit_AgileTestCase
 
     /** @var bool Debug mode enabled/disabled. In debug mode will use Dumper persistence */
     public $debug = false;
-    /** @var string What DB driver we use - mysql, sqlite, pgsql etc */
-    public $driver = 'sqlite';
+
     /** @var string DSN string */
     protected $dsn;
+
+    /** @var string What DB driver we use - mysql, sqlite, pgsql etc */
+    public $driver = 'sqlite';
 
     /**
      * Setup test database.
@@ -37,19 +32,12 @@ class PHPUnit_SchemaTestCase extends PHPUnit_AgileTestCase
         parent::setUp();
 
         // establish connection
-        $this->dsn = ($this->debug ? ('dumper:') : '') . (isset($GLOBALS['DB_DSN']) ? $GLOBALS['DB_DSN'] : 'sqlite::memory:');
-        $user      = isset($GLOBALS['DB_USER']) ? $GLOBALS['DB_USER'] : null;
-        $pass      = isset($GLOBALS['DB_PASSWD']) ? $GLOBALS['DB_PASSWD'] : null;
+        $this->dsn = ($this->debug ? ('dumper:') : '').(isset($GLOBALS['DB_DSN']) ? $GLOBALS['DB_DSN'] : 'sqlite::memory:');
+        $user = isset($GLOBALS['DB_USER']) ? $GLOBALS['DB_USER'] : null;
+        $pass = isset($GLOBALS['DB_PASSWD']) ? $GLOBALS['DB_PASSWD'] : null;
 
         $this->db = Persistence::connect($this->dsn, $user, $pass);
-
-        // extract dirver
-        if ($this->debug) {
-            list($dumper_driver, $this->driver, $junk) = explode(':', $this->dsn, 3);
-        } else {
-            list($this->driver, $junk) = explode(':', $this->dsn, 2);
-        }
-        $this->driver = strtolower($this->driver);
+        $this->driver = $this->db->connection->driver;
     }
 
     public function tearDown()
@@ -60,6 +48,18 @@ class PHPUnit_SchemaTestCase extends PHPUnit_AgileTestCase
     }
 
     /**
+     * Create and return appropriate Migration object.
+     *
+     * @param Connection|Persistence|Model $m
+     *
+     * @return Migration
+     */
+    public function getMigration($m = null)
+    {
+        return \atk4\schema\Migration::getMigration($m ?: $this->db);
+    }
+
+    /**
      * Use this method to clean up tables after you have created them,
      * so that your database would be ready for the next test.
      *
@@ -67,54 +67,7 @@ class PHPUnit_SchemaTestCase extends PHPUnit_AgileTestCase
      */
     public function dropTable($table)
     {
-        $this->db->connection->expr('drop table if exists {}', [$table])->execute();
-    }
-
-    /**
-     * Return database data.
-     *
-     * @param array $tables Array of tables
-     * @param bool  $no_id
-     *
-     * @return array
-     */
-    public function getDB($tables = null, $no_id = false)
-    {
-        if (!$tables) {
-            $tables = $this->tables;
-        }
-
-        if (is_string($tables)) {
-            $tables = array_map('trim', explode(',', $tables));
-        }
-
-        $ret = [];
-
-        foreach ($tables as $table) {
-            $data2 = [];
-
-            $s    = $this->db->dsql();
-            $data = $s->table($table)->get();
-
-            foreach ($data as &$row) {
-                foreach ($row as &$val) {
-                    if (is_int($val)) {
-                        $val = (int)$val;
-                    }
-                }
-
-                if ($no_id) {
-                    unset($row['id']);
-                    $data2[] = $row;
-                } else {
-                    $data2[$row['id']] = $row;
-                }
-            }
-
-            $ret[$table] = $data2;
-        }
-
-        return $ret;
+        $this->getMigration()->table($table)->drop();
     }
 
     /**
@@ -149,7 +102,7 @@ class PHPUnit_SchemaTestCase extends PHPUnit_AgileTestCase
                     } elseif (is_float($row)) {
                         $s->field($field, ['type' => 'numeric(10,5)']);
                         continue;
-                    } elseif ($row instanceof DateTime) {
+                    } elseif ($row instanceof \DateTime) {
                         $s->field($field, ['type' => 'datetime']);
                         continue;
                     }
@@ -166,7 +119,7 @@ class PHPUnit_SchemaTestCase extends PHPUnit_AgileTestCase
 
             // import data
             if ($import_data) {
-                $has_id = (bool)key($data);
+                $has_id = (bool) key($data);
 
                 foreach ($data as $id => $row) {
                     $s = $this->db->dsql();
@@ -188,31 +141,49 @@ class PHPUnit_SchemaTestCase extends PHPUnit_AgileTestCase
     }
 
     /**
-     * Create and return appropriate Migration object.
+     * Return database data.
      *
-     * @param Connection|Persistence|Model $m
+     * @param array $tables Array of tables
+     * @param bool  $no_id
      *
-     * @return Migration
+     * @return array
      */
-    public function getMigration($m = null)
+    public function getDB($tables = null, $no_id = false)
     {
-        switch ($this->driver) {
-            case 'sqlite':
-                return new SQLite($m ?: $this->db);
-            case 'mysql':
-                return new MySQL($m ?: $this->db);
-            case 'pgsql':
-                return new PgSQL($m ?: $this->db);
-            case 'oci':
-                return new Oracle($m ?: $this->db);
-            default:
-                throw new Exception(
-                    [
-                        'Not sure which migration class to use for your DSN',
-                        'driver' => $this->driver,
-                        'dsn'    => $this->dsn,
-                    ]
-                );
+        if (!$tables) {
+            $tables = $this->tables;
         }
+
+        if (is_string($tables)) {
+            $tables = array_map('trim', explode(',', $tables));
+        }
+
+        $ret = [];
+
+        foreach ($tables as $table) {
+            $data2 = [];
+
+            $s = $this->db->dsql();
+            $data = $s->table($table)->get();
+
+            foreach ($data as &$row) {
+                foreach ($row as &$val) {
+                    if (is_int($val)) {
+                        $val = (int) $val;
+                    }
+                }
+
+                if ($no_id) {
+                    unset($row['id']);
+                    $data2[] = $row;
+                } else {
+                    $data2[$row['id']] = $row;
+                }
+            }
+
+            $ret[$table] = $data2;
+        }
+
+        return $ret;
     }
 }

@@ -16,7 +16,7 @@ $m = new User($db, 'user');
 
 try {
     // apply migrator
-    (new \atk4\schema\Migration\MySQL($m))->migrate();
+    (\atk4\schema\Migration::getMigration($m))->migrate();
 
     // ok, now we surely have DB!
 

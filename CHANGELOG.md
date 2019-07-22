@@ -1,30 +1,47 @@
 # Change Log
 
-## [Unreleased](https://github.com/atk4/schema/tree/HEAD)
+## [1.1.6](https://github.com/atk4/schema/tree/1.1.6) 
 
-[Full Changelog](https://github.com/atk4/schema/compare/1.1.4...HEAD)
+[Full Changelog](https://github.com/atk4/schema/compare/1.1.5...1.1.6)
+
+**Fixed bugs:**
+
+- Feature/support array and object types [\#12](https://github.com/atk4/schema/pull/12) ([DarkSide666](https://github.com/DarkSide666))
+
+**Merged pull requests:**
+
+- compatibility with new data namespace [\#11](https://github.com/atk4/schema/pull/11) ([DarkSide666](https://github.com/DarkSide666))
+
+## [1.1.5](https://github.com/atk4/schema/tree/1.1.5) (2018-08-16)
+
+[Full Changelog](https://github.com/atk4/schema/compare/1.1.4...1.1.5)
 
 **Merged pull requests:**
 
 - fix alter and drop field [\#7](https://github.com/atk4/schema/pull/7) ([DarkSide666](https://github.com/DarkSide666))
 
 ## [1.1.4](https://github.com/atk4/schema/tree/1.1.4) (2018-04-19)
-[Full Changelog](https://github.com/atk4/schema/compare/1.1.3...1.1.4)
 
-## [1.1.3](https://github.com/atk4/schema/tree/1.1.3) (2018-04-10)
-[Full Changelog](https://github.com/atk4/schema/compare/1.1.2...1.1.3)
+[Full Changelog](https://github.com/atk4/schema/compare/1.1.3...1.1.4)
 
 **Merged pull requests:**
 
 - Feature/add migrator [\#6](https://github.com/atk4/schema/pull/6) ([romaninsh](https://github.com/romaninsh))
 
+## [1.1.3](https://github.com/atk4/schema/tree/1.1.3) (2018-04-10)
+
+[Full Changelog](https://github.com/atk4/schema/compare/1.1.2...1.1.3)
+
 ## [1.1.2](https://github.com/atk4/schema/tree/1.1.2) (2018-04-06)
+
 [Full Changelog](https://github.com/atk4/schema/compare/1.1.1...1.1.2)
 
 ## [1.1.1](https://github.com/atk4/schema/tree/1.1.1) (2018-04-06)
+
 [Full Changelog](https://github.com/atk4/schema/compare/1.1.0...1.1.1)
 
 ## [1.1.0](https://github.com/atk4/schema/tree/1.1.0) (2018-04-03)
+
 [Full Changelog](https://github.com/atk4/schema/compare/1.0.2...1.1.0)
 
 **Closed issues:**
@@ -38,15 +55,21 @@
 - drop php 5.5, update phpunit [\#3](https://github.com/atk4/schema/pull/3) ([DarkSide666](https://github.com/DarkSide666))
 
 ## [1.0.2](https://github.com/atk4/schema/tree/1.0.2) (2017-04-12)
+
 [Full Changelog](https://github.com/atk4/schema/compare/1.0.1...1.0.2)
 
 ## [1.0.1](https://github.com/atk4/schema/tree/1.0.1) (2017-04-12)
+
 [Full Changelog](https://github.com/atk4/schema/compare/1.0...1.0.1)
 
 ## [1.0](https://github.com/atk4/schema/tree/1.0) (2016-09-30)
+
 [Full Changelog](https://github.com/atk4/schema/compare/0.1...1.0)
 
 ## [0.1](https://github.com/atk4/schema/tree/0.1) (2016-09-30)
+
+[Full Changelog](https://github.com/atk4/schema/compare/046cc18d3f924ec52cc4959a2d8195572ddb22c8...0.1)
+
 **Merged pull requests:**
 
 - Applied fixes from StyleCI [\#1](https://github.com/atk4/schema/pull/1) ([romaninsh](https://github.com/romaninsh))

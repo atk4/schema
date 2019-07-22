@@ -3,12 +3,8 @@
 namespace atk4\schema;
 
 use atk4\core\Exception;
-use atk4\data\Field;
-use atk4\data\Field_SQL_Expression;
-use atk4\data\Model;
+use atk4\Data\Model;
 use atk4\data\Persistence;
-use atk4\data\Persistence\SQL;
-use atk4\data\Reference;
 use atk4\dsql\Connection;
 use atk4\dsql\Expression;
 
@@ -16,50 +12,7 @@ class Migration extends Expression
 {
     /** @var string Expression mode. See $templates. */
     public $mode = 'create';
-    /** @var Connection Database connection */
-    public $connection;
-    /** @var string Expression to create primary key */
-    public $primary_key_expr = 'integer primary key autoincrement';
-    /** @var array Datatypes to decode DSQL specific type and len of field
-     *
-     * definition of Field type attribute from \atk4\data\Field.
-     *
-     * Values are: 'string', 'text', 'boolean', 'integer', 'money', 'float',
-     *             'date', 'datetime', 'time', 'array', 'object'.
-     *
-     * Can also be set to unspecified type for your own custom handling.
-     *
-     * add : double, password
-     *
-     */
-    public $dataTypeTranscodes
-        = [
-            'boolean'  => 'BOOLEAN',
-            'integer'  => 'INT4',
-            'string'   => 'VARCHAR256',
-            'password' => 'VARCHAR256',
-            'double'   => 'DOUBLE',
-            'float'    => 'FLOAT',
-            'money'    => 'FLOAT',
-            'date'     => 'DATE',
-            'datetime' => 'DATETIME',
-            'time'     => 'TIME',
-            'text'     => 'TEXT',
-            'array'    => 'TEXT',
-            'object'   => 'TEXT',
-        ];
-    /**
-     * @var string if no transcode match fallaback to default
-     *
-     * changed to text because is better to have more space than 256 char
-     * i had a problem storing EXIFData serialized
-     */
-    public $dataTypeTranscodeDefault = 'VARCHAR256';
-    /**
-     * @var array Datatypes to decode driver specific type and len of field
-     * is defined in the extended Migration class
-     */
-    public $driverDataTypeTranscodes = [];
+
     /** @var array Expression templates */
     protected $templates = [
         'create' => 'create table {table} ([field])',
@@ -67,6 +20,10 @@ class Migration extends Expression
         'alter'  => 'alter table {table} [statements]',
         'rename' => 'rename table {old_table} to {table}',
     ];
+
+    /** @var Connection Database connection */
+    public $connection;
+
     /**
      * Field, table and alias name escaping symbol.
      * By SQL Standard it's double quote, but MySQL uses backtick.
@@ -75,51 +32,127 @@ class Migration extends Expression
      */
     protected $escape_char = '"';
 
+    /** @var string Expression to create primary key */
+    public $primary_key_expr = 'integer primary key autoincrement';
+
+    /** @var array Conversion mapping from Agile Data types to persistence types */
+    protected $defaultMapToPersistence = [
+        ['varchar', 255], // default
+        'boolean'   => ['tinyint', 1],
+        'integer'   => ['int'],
+        'money'     => ['decimal', 12, 2],
+        'float'     => ['decimal', 16, 6],
+        'date'      => ['date'],
+        'datetime'  => ['datetime'],
+        'time'      => ['varchar', 8],
+        'text'      => ['text'],
+        'array'     => ['text'],
+        'object'    => ['text'],
+    ];
+
+    /** @var array use this array in extended classes to overwrite or extend values of default mapping */
+    public $mapToPersistence = [];
+
+    /** @var array Conversion mapping from persistence types to Agile Data types */
+    protected $defaultMapToAgile = [
+        [null], // default
+        'tinyint'   => ['boolean'],
+        'int'       => ['integer'],
+        'decimal'   => ['float'],
+        'numeric'   => ['float'],
+        'date'      => ['date'],
+        'datetime'  => ['datetime'],
+        'timestamp' => ['datetime'],
+        'text'      => ['text'],
+    ];
+
+    /** @var array use this array in extended classes to overwrite or extend values of default mapping */
+    public $mapToAgile = [];
+
+    /**
+     * Factory method to get correct Migration subclass object depending on connection given.
+     *
+     * @param Connection|Persistence|Model $source
+     * @param array                        $params
+     *
+     * @return Migration Subclass
+     */
+    public static function getMigration($source, $params = [])
+    {
+        $c = static::getConnection($source);
+
+        switch ($c->driver) {
+            case 'sqlite':
+                return new Migration\SQLite($source, $params);
+            case 'mysql':
+                return new Migration\MySQL($source, $params);
+            case 'pgsql':
+                return new Migration\PgSQL($source, $params);
+            case 'oci':
+                return new Migration\Oracle($source, $params);
+            default:
+                throw new Exception([
+                    'Not sure which migration class to use for your DSN',
+                    'driver' => $c->driver,
+                    'source' => $source,
+                ]);
+        }
+    }
+
+    /**
+     * Static method to extract DB driver from Connection, Persistence or Model.
+     *
+     * @param Connection|Persistence|Model $source
+     */
+    public static function getConnection($source)
+    {
+        if ($source instanceof Connection) {
+            return $source;
+        } elseif ($source instanceof Persistence\SQL) {
+            return $source->connection;
+        } elseif (
+            $source instanceof Model
+            && $source->persistence
+            && ($source->persistence instanceof Persistence\SQL)
+        ) {
+            return $source->persistence->connection;
+        }
+
+        throw new Exception([
+            'Source is specified incorrectly. Must be Connection, Persistence or initialized Model',
+            'source' => $source,
+        ]);
+    }
+
     /**
      * Create new migration.
      *
      * @param Connection|Persistence|Model $source
      * @param array                        $params
-     *
-     * @throws Exception
-     * @throws \atk4\dsql\Exception
      */
-    public function __construct($source, array $params = [])
+    public function __construct($source, $params = [])
     {
         parent::__construct($params);
 
-        switch(true)
-        {
-            case $source instanceof Connection:
-                $this->connection = $source;
-            break;
+        $this->setSource($source);
+    }
 
-            case $source instanceof SQL:
-                $this->connection = $source->connection;
-            break;
+    /**
+     * Sets source of migration.
+     *
+     * @param Connection|Persistence|Model $source
+     */
+    public function setSource($source)
+    {
+        $this->connection = static::getConnection($source);
 
-            case $source instanceof Model:
-                if (($source->persistence ?? NULL) instanceof SQL) {
-                    $this->connection = $source->persistence->connection;
-
-                    $this->setModel($source);
-
-                    return;
-                }
-            break;
+        if (
+            $source instanceof Model
+            && $source->persistence
+            && ($source->persistence instanceof Persistence\SQL)
+        ) {
+            $this->setModel($source);
         }
-
-        if($this->connection)
-        {
-            return;
-        }
-
-        throw new Exception(
-            [
-                'Source is specified incorrectly. Must be Connection, Persistence or initialized Model',
-                'source' => $source,
-            ]
-        );
     }
 
     /**
@@ -127,25 +160,19 @@ class Migration extends Expression
      *
      * @param Model $m
      *
-     * @throws Exception
-     *
      * @return Model
      */
-    public function setModel(Model $m) : Model
+    public function setModel(Model $m)
     {
         $this->table($m->table);
 
         foreach ($m->getFields() as $field) {
             // ignore not persisted model fields
-            if (!$field instanceof Field) {
-                continue;
-            }
-
             if ($field->never_persist) {
                 continue;
             }
 
-            if ($field instanceof Field_SQL_Expression) {
+            if ($field instanceof \atk4\data\Field_SQL_Expression) {
                 continue;
             }
 
@@ -154,166 +181,10 @@ class Migration extends Expression
                 continue;
             }
 
-            $transcodeTypeKey = $this->getTranscodeTypeKeyFromField($field);
-
-            $this->field($field->actual ?: $field->short_name, ['transcode_key' => $transcodeTypeKey]);
+            $this->field($field->actual ?: $field->short_name, ['type' => $field->type]);  // todo add more options here
         }
 
         return $m;
-    }
-
-    /**
-     * Sets table name.
-     *
-     * @param string $table
-     *
-     * @return $this
-     */
-    public function table(string $table) : self
-    {
-        $this['table'] = $table;
-
-        return $this;
-    }
-
-    /**
-     * Add ID field in template.
-     *
-     * @param string $name
-     *
-     * @return $this
-     */
-    public function id(string $name = null) : self
-    {
-        if (!$name) {
-            $name = 'id';
-        }
-
-        $val = $this->connection->expr($this->primary_key_expr);
-
-        $this->args['field'] =
-            [$name => $val] + (isset($this->args['field']) ? $this->args['field'] : []);
-
-        return $this;
-    }
-
-    /**
-     * Get Transcode Type Key from Field
-     * Transcode table used : $dataTypeTranscodes
-     *
-     * @param Field $field DSQL field
-     *
-     * @return string
-     */
-    protected function getTranscodeTypeKeyFromField(Field $field) : string
-    {
-        if ($field->reference instanceof Reference\HasOne) {
-            $referenceFieldID = $field->reference->owner->id_field;
-            $referenceField   = $field->reference->owner->getField($referenceFieldID);
-
-            if ($referenceField->type === null) {
-                return $this->dataTypeTranscodes['integer'];
-            }
-
-            $field = $referenceField;
-        }
-
-        if (isset($field->type) && isset($this->dataTypeTranscodes[$field->type])) {
-            return $this->dataTypeTranscodes[$field->type];
-        }
-
-        return $this->dataTypeTranscodeDefault;
-    }
-
-    /**
-     * Add field in template.
-     *
-     * @param string $name
-     * @param array  $options
-     *
-     * @throws Exception
-     * @return $this
-     */
-    public function field(string $name, array $options = []) : self
-    {
-        // is is set is internal call
-        if (isset($options['transcode_key'])) {
-            $options = $this->driverDataTypeTranscodes[$options['transcode_key']];
-        } else {
-            // is is call from outside, need to normalize
-            $type = $options['type'] ?? 'string';
-
-            $transcodeTypeKey = $this->getTranscodeTypeKeyFromTypeName($type);
-
-            $options = $this->driverDataTypeTranscodes[$transcodeTypeKey];
-        }
-
-        // save field in args
-        $this->_set_args('field', $name, $options);
-
-        return $this;
-    }
-
-    /**
-     * Get Transcode Type Key from type name
-     * Transcode table used : $driverDataTypeTranscodes
-     *
-     * @param string $type field type
-     *
-     * @return string
-     */
-    protected function getTranscodeTypeKeyFromTypeName(string $type) : string
-    {
-        foreach ($this->driverDataTypeTranscodes as $key => $options) {
-            if ($options['type'] === $type) {
-                return $key;
-            }
-        }
-
-        return $this->dataTypeTranscodeDefault;
-    }
-
-    /**
-     * Sets value in args array. Doesn't allow duplicate aliases.
-     *
-     * @param string $what  Where to set it - table|field
-     * @param string $alias Alias name
-     * @param mixed  $value Value to set in args array
-     *
-     * @throws Exception
-     */
-    protected function _set_args(string $what, string $alias, $value)
-    {
-        // save value in args
-        if ($alias === null) {
-            $this->args[$what][] = $value;
-        } else {
-            // don't allow multiple values with same alias
-            if (isset($this->args[$what][$alias])) {
-                throw new Exception(
-                    [
-                        ucfirst($what) . ' alias should be unique',
-                        'alias' => $alias,
-                    ]
-                );
-            }
-
-            $this->args[$what][$alias] = $value;
-        }
-    }
-
-    /**
-     * Drop table.
-     *
-     * @throws Exception
-     *
-     * @return $this
-     */
-    public function drop() : self
-    {
-        $this->mode('drop')->execute();
-
-        return $this;
     }
 
     /**
@@ -321,18 +192,52 @@ class Migration extends Expression
      *
      * @param string $mode Template name
      *
-     * @throws Exception
-     *
      * @return $this
      */
-    public function mode(string $mode) : self
+    public function mode($mode)
     {
         if (!isset($this->templates[$mode])) {
             throw new Exception(['Structure builder does not have this mode', 'mode' => $mode]);
         }
 
-        $this->mode     = $mode;
+        $this->mode = $mode;
         $this->template = $this->templates[$mode];
+
+        return $this;
+    }
+
+    /**
+     * Create new table.
+     *
+     * @return $this
+     */
+    public function create()
+    {
+        $this->mode('create')->execute();
+
+        return $this;
+    }
+
+    /**
+     * Drop table.
+     *
+     * @return $this
+     */
+    public function drop()
+    {
+        $this->mode('drop')->execute();
+
+        return $this;
+    }
+
+    /**
+     * Alter table.
+     *
+     * @return $this
+     */
+    public function alter()
+    {
+        $this->mode('alter')->execute();
 
         return $this;
     }
@@ -340,11 +245,9 @@ class Migration extends Expression
     /**
      * Rename table.
      *
-     * @throws Exception
-     *
      * @return $this
      */
-    public function rename() : self
+    public function rename()
     {
         $this->mode('rename')->execute();
 
@@ -355,9 +258,6 @@ class Migration extends Expression
      * Will read current schema and consult current 'field' arguments, to see if they are matched.
      * If table does not exist, will invoke ->create. If table does exist, then it will execute
      * methods ->newField(), ->dropField() or ->alterField() as needed, then call ->alter().
-     *
-     * @throws Exception
-     * @throws \atk4\dsql\Exception
      *
      * @return string Returns short textual info for logging purposes
      */
@@ -380,19 +280,16 @@ class Migration extends Expression
 
         // add new fields or update existing ones
         foreach ($new as $field => $options) {
+            // never update ID field (sadly hard-coded field name)
             if ($field == 'id') {
                 continue;
             }
 
             if (isset($old[$field])) {
-                // never update ID field (sadly hard-coded field name)
 
                 // compare options and if needed alter field
                 // @todo add more options here like 'len'
-                if (array_key_exists('type', $old[$field]) && array_key_exists(
-                        'type',
-                        $options
-                    ) && $old[$field]['type'] != $options['type']) {
+                if (array_key_exists('type', $old[$field]) && array_key_exists('type', $options) && $old[$field]['type'] != $options['type']) {
                     $this->alterField($field, $options);
                     $altered++;
                     $changes++;
@@ -422,12 +319,170 @@ class Migration extends Expression
         if ($changes) {
             $this->alter();
 
-            return 'added ' . $added . ' field' . ($added % 10 == 1 ? '' : 's') . ', ' .
-                'changed ' . $altered . ' field' . ($altered % 10 == 1 ? '' : 's') . ' and ' .
-                'deleted ' . $dropped . ' field' . ($dropped % 10 == 1 ? '' : 's');
+            return 'added '.$added.' field'.($added % 10 == 1 ? '' : 's').', '.
+                'changed '.$altered.' field'.($altered % 10 == 1 ? '' : 's').' and '.
+                'deleted '.$dropped.' field'.($dropped % 10 == 1 ? '' : 's');
         }
 
         return 'no changes';
+    }
+
+    /**
+     * Renders statement.
+     *
+     * @return string
+     */
+    public function _render_statements()
+    {
+        $result = [];
+
+        if (isset($this->args['dropField'])) {
+            foreach ($this->args['dropField'] as $field => $junk) {
+                $result[] = 'drop column '.$this->_escape($field);
+            }
+        }
+
+        if (isset($this->args['newField'])) {
+            foreach ($this->args['newField'] as $field => $option) {
+                $result[] = 'add column '.$this->_render_one_field($field, $option);
+            }
+        }
+
+        if (isset($this->args['alterField'])) {
+            foreach ($this->args['alterField'] as $field => $option) {
+                $result[] = 'change column '.$this->_escape($field).' '.$this->_render_one_field($field, $option);
+            }
+        }
+
+        return implode(', ', $result);
+    }
+
+    /**
+     * Create rough model from current set of $this->args['fields']. This is not
+     * ideal solution but is designed as a drop-in solution.
+     *
+     * @param Persistence $persistence
+     * @param string      $table
+     *
+     * @return Model
+     */
+    public function createModel($persistence, $table = null)
+    {
+        $m = new Model([$persistence, 'table'=>$table ?: $this['table'] = $table]);
+
+        foreach ($this->_getFields() as $field => $options) {
+            if ($field == 'id') {
+                continue;
+            }
+
+            if (is_object($options)) {
+                continue;
+            }
+
+            $defaults = [];
+
+            if ($options['type']) {
+                $defaults['type'] = $options['type'];
+            }
+            $m->addField($field, $defaults);
+        }
+
+        return $m;
+    }
+
+    /**
+     * Sets newField argument.
+     *
+     * @param string $field
+     * @param array  $options
+     *
+     * @return $this
+     */
+    public function newField($field, $options = [])
+    {
+        $this->_set_args('newField', $field, $options);
+
+        return $this;
+    }
+
+    /**
+     * Sets alterField argument.
+     *
+     * @param string $field
+     * @param array  $options
+     *
+     * @return $this
+     */
+    public function alterField($field, $options = [])
+    {
+        $this->_set_args('alterField', $field, $options);
+
+        return $this;
+    }
+
+    /**
+     * Sets dropField argument.
+     *
+     * @param string $field
+     *
+     * @return $this
+     */
+    public function dropField($field)
+    {
+        $this->_set_args('dropField', $field, true);
+
+        return $this;
+    }
+
+    /**
+     * Return database table descriptions.
+     * DB engine specific.
+     *
+     * @todo Maybe convert to abstract function
+     *
+     * @param string $table
+     *
+     * @return array
+     */
+    public function describeTable($table)
+    {
+        return $this->connection->expr('pragma table_info({})', [$table])->get();
+    }
+
+    /**
+     * Convert SQL field types to Agile Data field types.
+     *
+     * @param string $type SQL field type
+     *
+     * @return string|null
+     */
+    public function getModelFieldType($type)
+    {
+        // remove parenthesis
+        $type = trim(preg_replace('/\(.*/', '', strtolower($type)));
+
+        $map = array_merge($this->defaultMapToAgile, $this->mapToAgile);
+        $a = array_key_exists($type, $map) ? $map[$type] : $map[0];
+
+        return $a[0];
+    }
+
+    /**
+     * Convert Agile Data field types to SQL field types.
+     *
+     * @param string $type    Agile Data field type
+     * @param array  $options More options
+     *
+     * @return string
+     */
+    public function getSQLFieldType($type, $options = [])
+    {
+        $type = strtolower($type);
+
+        $map = array_merge($this->defaultMapToPersistence, $this->mapToPersistence);
+        $a = array_key_exists($type, $map) ? $map[$type] : $map[0];
+
+        return $a[0].(count($a) > 1 ? ' ('.implode(',', array_slice($a, 1)).')' : '');
     }
 
     /**
@@ -435,11 +490,9 @@ class Migration extends Expression
      *
      * @param string $table
      *
-     * @throws Exception
-     *
      * @return bool
      */
-    public function importTable(string $table) : bool
+    public function importTable($table)
     {
         $this->table($table);
         $has_fields = false;
@@ -450,157 +503,104 @@ class Migration extends Expression
                 continue;
             }
 
-            $type = strtok($row['type'], '(');
+            $type = $this->getModelFieldType($row['type']);
 
-            // get transcode key from Drivers DataTypeTrancode
-            $transcodeTypeKey = $this->getTranscodeTypeKeyFromTypeName($type);
-
-            // call field with options 'transcode_key' to know is an internal call
-            $this->field($row['name'], ['transcode_key' => $transcodeTypeKey]);
-        }
-
-        if($has_fields === false)
-        {
-            throw new \atk4\data\Exception([
-                'No fields in table',
-                'table' => $table
-            ]);
+            $this->field($row['name'], ['type'=>$type]);
         }
 
         return $has_fields;
     }
 
     /**
-     * Return database table descriptions.
-     * DB engine specific.
+     * Sets table name.
      *
      * @param string $table
      *
-     * @return array
-     */
-    public function describeTable(string $table) : array
-    {
-        return $this->connection->expr('pragma table_info({})', [$table])->get();
-    }
-
-    /**
-     * Create new table.
-     *
-     * @throws Exception
-     *
-     * @throws \atk4\dsql\Exception
      * @return $this
      */
-    public function create() : self
+    public function table($table)
     {
-        $this->mode('create')->execute();
+        $this['table'] = $table;
 
         return $this;
     }
 
     /**
-     * Return fields.
+     * Sets old table name.
      *
-     * @return array
+     * @param string $table
+     *
+     * @return $this
      */
-    public function _getFields() : array
+    public function old_table($old_table)
     {
-        return $this->args['field'];
+        $this['old_table'] = $old_table;
+
+        return $this;
     }
 
     /**
-     * Sets alterField argument.
+     * Add field in template.
      *
-     * @param string $field
+     * @param string $name
      * @param array  $options
      *
-     * @throws Exception
-     *
      * @return $this
      */
-    public function alterField(string $field, ?array $options = null) :self
+    public function field($name, $options = [])
     {
-        $this->_set_args('alterField', $field, $options ?? []);
+        // save field in args
+        $this->_set_args('field', $name, $options);
 
         return $this;
     }
 
     /**
-     * Sets newField argument.
+     * Add ID field in template.
      *
-     * @param string $field
-     * @param array  $options
-     *
-     * @throws Exception
+     * @param string $name
      *
      * @return $this
      */
-    public function newField(string $field, ?array $options = null) :self
+    public function id($name = null)
     {
-        $this->_set_args('newField', $field, $options ?? []);
+        if (!$name) {
+            $name = 'id';
+        }
+
+        $val = $this->connection->expr($this->primary_key_expr);
+
+        $this->args['field'] =
+            [$name => $val] + (isset($this->args['field']) ? $this->args['field'] : []);
 
         return $this;
     }
 
     /**
-     * Sets dropField argument.
-     *
-     * @param string $field
-     *
-     * @throws Exception
-     *
-     * @return $this
-     */
-    public function dropField($field) :self
-    {
-        $this->_set_args('dropField', $field, true);
-
-        return $this;
-    }
-
-    /**
-     * Alter table.
-     *
-     * @throws Exception
-     * @throws \atk4\dsql\Exception
-     *
-     * @return $this
-     */
-    public function alter() : self
-    {
-        $this->mode('alter')->execute();
-
-        return $this;
-    }
-
-    /**
-     * Renders statement.
+     * Render "field" template.
      *
      * @return string
      */
-    public function _render_statements() : string
+    public function _render_field()
     {
-        $result = [];
+        $ret = [];
 
-        if (isset($this->args['dropField'])) {
-            foreach ($this->args['dropField'] as $field => $junk) {
-                $result[] = 'drop column ' . $this->_escape($field);
-            }
+        if (!$this->args['field']) {
+            throw new Exception([
+                'No fields defined for table',
+            ]);
         }
 
-        if (isset($this->args['newField'])) {
-            foreach ($this->args['newField'] as $field => $option) {
-                $result[] = 'add column ' . $this->_render_one_field($field, $option);
+        foreach ($this->args['field'] as $field => $options) {
+            if ($options instanceof Expression) {
+                $ret[] = $this->_escape($field).' '.$this->_consume($options);
+                continue;
             }
+
+            $ret[] = $this->_render_one_field($field, $options);
         }
 
-        if (isset($this->args['alterField'])) {
-            foreach ($this->args['alterField'] as $field => $option) {
-                $result[] = 'change column ' . $this->_escape($field) . ' ' . $this->_render_one_field($field, $option);
-            }
-        }
-
-        return implode(', ', $result);
+        return implode(',', $ret);
     }
 
     /**
@@ -611,56 +611,48 @@ class Migration extends Expression
      *
      * @return string
      */
-    protected function _render_one_field(string $field, array $options) : string
+    protected function _render_one_field($field, $options)
     {
-        $name = isset($options['name']) ? $options['name'] : $field;
+        $name = $options['name'] ?? $field;
+        $type = $this->getSQLFieldType($options['type'] ?? null, $options);
 
-        $type = strtolower(
-            isset($options['type']) ?
-                $options['type'] : ''
-        );
-        $type = preg_replace('/[^a-z0-9\(\),;\.]+/', '', $type);
-
-        $len = isset($options['len'])
-            ?
-            $options['len']
-            :
-            ($type === 'varchar' ? 255 : null);
-
-        return $this->_escape($name) . ' ' . $type .
-            ($len ? ('(' . $len . ')') : '');
+        return $this->_escape($name).' '.$type;
     }
 
     /**
-     * Render "field" template.
+     * Return fields.
      *
-     * @throws Exception
-     * @throws \atk4\dsql\Exception
-     *
-     * @return string
+     * @return array
      */
-    public function _render_field() :string
+    public function _getFields()
     {
-        $ret = [];
+        return $this->args['field'];
+    }
 
-        if (!$this->args['field']) {
-            throw new Exception(
-                [
-                    'No fields defined for table',
-                ]
-            );
-        }
+    /**
+     * Sets value in args array. Doesn't allow duplicate aliases.
+     *
+     * @param string $what  Where to set it - table|field
+     * @param string $alias Alias name
+     * @param mixed  $value Value to set in args array
+     */
+    protected function _set_args($what, $alias, $value)
+    {
+        // save value in args
+        if ($alias === null) {
+            $this->args[$what][] = $value;
+        } else {
 
-        foreach ($this->args['field'] as $field => $options) {
-            if ($options instanceof Expression) {
-                $ret[] = $this->_escape($field) . ' ' . $this->_consume($options);
-                continue;
+            // don't allow multiple values with same alias
+            if (isset($this->args[$what][$alias])) {
+                throw new Exception([
+                    ucfirst($what).' alias should be unique',
+                    'alias' => $alias,
+                ]);
             }
 
-            $ret[] = $this->_render_one_field($field, $options);
+            $this->args[$what][$alias] = $value;
         }
-
-        return implode(',', $ret);
     }
 
     /**
@@ -678,9 +670,7 @@ class Migration extends Expression
     public function createModelFromTable($table, $model, $id_field = 'id', $namespace = '\Your\Project\Models') :string {
         $PHP = <<<PHP
 <?php
-
 namespace {$namespace};
-
 class {$model} extends \atk4\data\Model
 {
     /** @var string \$table table of the model */
@@ -695,33 +685,25 @@ class {$model} extends \atk4\data\Model
     }
 }
 PHP;
-
         $this->importTable($table);
-
         $replace = [
             '{__ID_FIELD__}' => $id_field === 'id' ? '' : '/** @var string $id_field custom field id of the model */' . PHP_EOL . '        public $id_field = "' . $id_field . '"',
             '{__FIELDS__}'   => '',
         ];
-
         foreach ($this->args['field'] as $fieldName => $options) {
             $transcodeTypeKey = $this->getTranscodeTypeKeyFromTypeName($options['type'] ?? '');
-
             $fieldType = $this->getTranscodeTypeKeyFromTypeName($this->dataTypeTranscodeDefault);
-
             foreach ($this->dataTypeTranscodes as $type => $transcode) {
                 if ($transcodeTypeKey === $transcode) {
                     $fieldType = $type;
                     break;
                 }
             }
-
             if ($id_field == $fieldName) {
                 continue;
             }
-
             $replace['{__FIELDS__}'] .= '        $this->addField("' . $fieldName . '",["type"=>"' . $fieldType . '"]);' . PHP_EOL;
         }
-
         return str_replace(array_keys($replace), array_values($replace), $PHP);
     }
 }

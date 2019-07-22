@@ -33,14 +33,14 @@ The user will see a console which would adjust database to contain required tabl
 Of course it's also possible to perform migration without visual feedback:
 
 ``` php
-$changes = (new \atk4\schema\Migration\MySQL(new User($app->db)))->migrate();
+$changes = (\atk4\schema\Migration::getMigration(new User($app->db)))->migrate();
 ```
 
 If you need a more fine-graned migration, you can define them in great detail.
 
 ``` php
 // create table
-$migration = new \atk4\schema\Migration\MySQL($app->db);
+$migration = \atk4\schema\Migration::getMigration($app->db);
 $migration->table('user')
     ->id()
     ->field('name')
@@ -48,13 +48,14 @@ $migration->table('user')
     ->create();
 
 // or alter
-$migration = new \atk4\schema\Migration\MySQL($app->db);
+$migration = \atk4\schema\Migration::getMigration($app->db);
 $migration->table('user')
     ->newField('age', ['type'=>'integer'])
     ->alter();
 ```
 
-You can also use `\atk4\schema\Migration\Sqlite`. Other SQL databases are not yet supported. Field declaration uses same types as [ATK Data](https://github.com/atk4/data).
+Currently we fully support MySQL and SQLite connections, partly PgSQL and Oracle connections. Other SQL databases are not yet supported.
+Field declaration uses same types as [ATK Data](https://github.com/atk4/data).
 
 ## Examples
 
@@ -63,7 +64,7 @@ queries using DSQL.
 
 ``` php
 <?php
-$m = new \atk4\data\schema\Migration($connection);
+$m = \atk4\data\schema\Migration::getMigration($connection);
 $m->table('user')->drop();
 $m->field('id');
 $m->field('name', ['type'=>'string']);
@@ -72,7 +73,7 @@ $m->field('bio');
 $m->create();
 ```
 
-`schema\Snapshot` is a simple class that can record and restore
+`schema\Snapshot` (NOT IMPLEMENTED) is a simple class that can record and restore
 table contents:
 
 ``` php
@@ -112,7 +113,7 @@ against any other state.
 
 - Automatically add 'id' field by default
 - Create tables for you
-- Detect types (int, string, etc)
+- Detect types (int, string, date, boolean etc)
 - Hides ID values if you don't pass them
 
 ## Installation

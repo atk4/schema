@@ -44,20 +44,15 @@ git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(
 
 git log --pretty=full $prev_version... | grep '#[0-9]*' | sed 's/#\([0-9]*\)/\1/' | while read i; do
     echo '---------------------------------------------------------------------------------'
-    ghi --color show $i | head -50
 done
 
 open "https://github.com/atk4/$product/compare/$prev_version...develop"
 
 composer remove --dev atk4/data
+composer remove --dev atk4/ui
 composer remove atk4/dsql
-composer remove atk4/core
-# Tweak our json file
-#sed -i "" -e '/atk4.*dev-develop/d' composer.json
-#rm -rf vendor/atk4/
-#composer update
 composer require atk4/dsql
-composer require --dev atk4/data
+composer require --dev atk4/data atk4/ui
 composer update
 
 ./vendor/phpunit/phpunit/phpunit  --no-coverage
