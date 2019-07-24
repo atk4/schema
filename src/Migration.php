@@ -215,7 +215,7 @@ class Migration extends Expression
                 $property = $reflection->getProperty('their_field');
                 $property->setAccessible(true);
 
-                // get their_field id
+                /** @var string $reference_their_field get Reflection protected property Reference->their_field */
                 $reference_their_field = $property->getValue($field->reference);
 
                 /** @var string $reference_field reference field name */
