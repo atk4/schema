@@ -217,15 +217,14 @@ class Migration extends Expression
 
                 // get their_field id
                 $reference_their_field = $property->getValue($field->reference);
-                $their_field = $reference_their_field ?? $field->reference->owner->id_field;
 
-                $refModelClass = $field->reference->model;
+                /** @var string $reference_field reference field name */
+                $reference_field = $reference_their_field ?? $field->reference->owner->id_field;
 
-                /** @var Model $refModel */
-                $refModel = new $refModelClass($m->persistence);
-                $refModel->getField($their_field);
+                /** @var string $reference_model_class reference class fqcn */
+                $reference_model_class = $field->reference->model;
 
-                $type = $refModel->getField($their_field)->type ?? 'integer';
+                $type = (new $reference_model_class($m->persistence))->getField($reference_field)->type ?? 'integer';
             }
 
             $this->field($field->actual ?: $field->short_name, ['type' => $type]);  // todo add more options here
