@@ -3,7 +3,9 @@
 namespace atk4\schema\Migration;
 
 // NOT IMPLEMENTED !!!
-class Oracle extends \atk4\schema\Migration
+use atk4\schema\Migration;
+
+class Oracle extends Migration
 {
     /** @var array use this array in extended classes to overwrite or extend values of default mapping */
     public $mapToPersistence = [
