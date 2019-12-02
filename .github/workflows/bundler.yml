@@ -16,9 +16,9 @@ jobs:
         run: |
           jq 'del(.require["atk4/dsql"]) | del(.["require-dev"]["atk4/ui"]) | del(.["require-dev"]["atk4/data"])' < composer.json > tmp && mv tmp composer.json
 
-          composer require atk4/dsql
-          composer require --dev atk4/data # atk4/ui - removed temporarily until atk4/ui is released
-          composer update
+          composer require --no-progress --no-suggest --prefer-dist --optimize-autoloader atk4/dsql
+          #composer require --dev atk4/data # atk4/ui - removed temporarily until atk4/ui is released
+          composer update --no-suggest --prefer-dist --optimize-autoloader 
 
       - uses: teaminkling/autocommit@master
         with:
