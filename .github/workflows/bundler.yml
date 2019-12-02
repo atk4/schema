@@ -14,9 +14,9 @@ jobs:
       - run: echo ${{ github.ref }}
       - name: Update to stable dependencies
         run: |
-          jq 'del(.require["atk4/core"]) | del(.["require-dev"]["atk4/ui"]) | del(.["require-dev"]["atk4/data"])' < composer.json > tmp && mv tmp composer.json
+          jq 'del(.require["atk4/dsql"]) | del(.["require-dev"]["atk4/ui"]) | del(.["require-dev"]["atk4/data"])' < composer.json > tmp && mv tmp composer.json
 
-          composer require atk4/core
+          composer require atk4/dsql
           composer require --dev atk4/ui atk4/data
           composer update
 
