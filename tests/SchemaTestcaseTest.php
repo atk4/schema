@@ -2,14 +2,18 @@
 
 namespace atk4\schema\tests;
 
-class SchemaTestcaseTest extends \atk4\schema\PHPUnit_SchemaTestCase
+use atk4\schema\PHPUnit_SchemaTestCase;
+
+class SchemaTestcaseTest extends PHPUnit_SchemaTestCase
 {
     public function testInit()
     {
-        $this->setDB($q = ['user' => [
-            ['name' => 'John', 'surname' => 'Smith'],
-            ['name' => 'Steve', 'surname' => 'Jobs'],
-        ]]);
+        $this->setDB($q = [
+            'user' => [
+                ['name' => 'John', 'surname' => 'Smith'],
+                ['name' => 'Steve', 'surname' => 'Jobs'],
+            ],
+        ]);
 
         $q2 = $this->getDB('user');
 
