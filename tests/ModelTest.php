@@ -106,6 +106,7 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
             'password',
             'is_admin',
             'notes',
+            'main_role_id', // our_field here not role_id (reference name)
         ],
             array_keys($user_model->getFields())
         );
@@ -124,5 +125,20 @@ class TestUser extends \atk4\data\Model
         $this->addField('password', ['type'=>'password']);
         $this->addField('is_admin', ['type'=>'boolean']);
         $this->addField('notes', ['type'=>'text']);
+
+        $this->hasOne('role_id', [TestRole::class, 'our_field' => 'main_role_id', 'their_field' => 'id']);
+    }
+}
+
+class TestRole extends \atk4\data\Model
+{
+    public $table = 'role';
+
+    public function init()
+    {
+        parent::init();
+
+        $this->addField('name');
+        $this->hasMany('Users', [TestUser::class, 'our_field' => 'id', 'their_field' => 'main_role_id']);
     }
 }
