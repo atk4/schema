@@ -37,7 +37,7 @@ class MySQL extends \atk4\schema\Migration
      *
      * @return array
      */
-    public function describeTable(string $table) : array
+    public function describeTable(string $table): array
     {
         if (!$this->connection->expr('show tables like []', [$table])->get()) {
             return []; // no such table

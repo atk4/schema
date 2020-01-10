@@ -19,7 +19,7 @@ class SQLite extends \atk4\schema\Migration
      *
      * @return array
      */
-    public function describeTable(string $table) : array
+    public function describeTable(string $table): array
     {
         return $this->connection->expr('pragma table_info({})', [$table])->get();
     }

@@ -102,11 +102,11 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
         $user_model = $m->createModel($this->db, 'user');
 
         $this->assertEquals([
-                'name',
-                'password',
-                'is_admin',
-                'notes',
-            ],
+            'name',
+            'password',
+            'is_admin',
+            'notes',
+        ],
             array_keys($user_model->getFields())
         );
     }

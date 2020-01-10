@@ -81,7 +81,7 @@ class Migration extends Expression
      *
      * @return Migration Subclass
      */
-    public static function getMigration($source, $params = []) : self
+    public static function getMigration($source, $params = []): self
     {
         $c = static::getConnection($source);
 
@@ -112,7 +112,7 @@ class Migration extends Expression
      *
      * @return Connection
      */
-    public static function getConnection($source) : Connection
+    public static function getConnection($source): Connection
     {
         if ($source instanceof Connection) {
             return $source;
@@ -178,7 +178,7 @@ class Migration extends Expression
      *
      * @return Model
      */
-    public function setModel(Model $m) :Model
+    public function setModel(Model $m): Model
     {
         $this->table($m->table);
 
@@ -242,7 +242,7 @@ class Migration extends Expression
      *
      * @return $this
      */
-    public function mode(string $mode) :self
+    public function mode(string $mode): self
     {
         if (!isset($this->templates[$mode])) {
             throw new Exception(['Structure builder does not have this mode', 'mode' => $mode]);
@@ -262,7 +262,7 @@ class Migration extends Expression
      *
      * @return $this
      */
-    public function create() :self
+    public function create(): self
     {
         $this->mode('create')->execute();
 
@@ -277,7 +277,7 @@ class Migration extends Expression
      *
      * @return $this
      */
-    public function drop() :self
+    public function drop(): self
     {
         $this->mode('drop')->execute();
 
@@ -292,7 +292,7 @@ class Migration extends Expression
      *
      * @return $this
      */
-    public function alter() :self
+    public function alter(): self
     {
         $this->mode('alter')->execute();
 
@@ -307,7 +307,7 @@ class Migration extends Expression
      *
      * @return $this
      */
-    public function rename() :self
+    public function rename(): self
     {
         $this->mode('rename')->execute();
 
@@ -323,7 +323,7 @@ class Migration extends Expression
      *
      * @return string Returns short textual info for logging purposes
      */
-    public function migrate() :string
+    public function migrate(): string
     {
         $changes = $added = $altered = $dropped = 0;
 
@@ -394,7 +394,7 @@ class Migration extends Expression
      *
      * @return string
      */
-    public function _render_statements() :string
+    public function _render_statements(): string
     {
         $result = [];
 
@@ -431,7 +431,7 @@ class Migration extends Expression
      *
      * @return Model
      */
-    public function createModel($persistence, $table = null) : Model
+    public function createModel($persistence, $table = null): Model
     {
         $this['table'] = $table ?? $this['table'];
 
@@ -469,7 +469,7 @@ class Migration extends Expression
      *
      * @return $this
      */
-    public function newField($field, $options = []) :self
+    public function newField($field, $options = []): self
     {
         $this->_set_args('newField', $field, $options);
 
@@ -486,7 +486,7 @@ class Migration extends Expression
      *
      * @return $this
      */
-    public function alterField(string $field, $options = []) :self
+    public function alterField(string $field, $options = []): self
     {
         $this->_set_args('alterField', $field, $options);
 
@@ -502,7 +502,7 @@ class Migration extends Expression
      *
      * @return $this
      */
-    public function dropField($field) :self
+    public function dropField($field): self
     {
         $this->_set_args('dropField', $field, true);
 
@@ -519,7 +519,7 @@ class Migration extends Expression
      *
      * @return array
      */
-    public function describeTable(string $table) : array
+    public function describeTable(string $table): array
     {
         return $this->connection->expr('pragma table_info({})', [$table])->get();
     }
@@ -531,7 +531,7 @@ class Migration extends Expression
      *
      * @return string|null
      */
-    public function getModelFieldType(string $type) :?string
+    public function getModelFieldType(string $type): ?string
     {
         // remove parenthesis
         $type = trim(preg_replace('/\(.*/', '', strtolower($type)));
@@ -550,7 +550,7 @@ class Migration extends Expression
      *
      * @return string|null
      */
-    public function getSQLFieldType(?string $type, ?array $options = null) :?string
+    public function getSQLFieldType(?string $type, ?array $options = null): ?string
     {
         $type = strtolower($type);
 
@@ -569,7 +569,7 @@ class Migration extends Expression
      *
      * @return bool
      */
-    public function importTable(string $table) :bool
+    public function importTable(string $table): bool
     {
         $this->table($table);
         $has_fields = false;
@@ -693,7 +693,7 @@ class Migration extends Expression
      *
      * @return string
      */
-    protected function _render_one_field(string $field, array $options) :string
+    protected function _render_one_field(string $field, array $options): string
     {
         $name = $options['name'] ?? $field;
         $type = $this->getSQLFieldType($options['type'] ?? null, $options);
@@ -706,7 +706,7 @@ class Migration extends Expression
      *
      * @return array
      */
-    public function _getFields() :array
+    public function _getFields(): array
     {
         return $this->args['field'];
     }
