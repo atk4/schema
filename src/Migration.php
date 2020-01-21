@@ -3,6 +3,7 @@
 namespace atk4\schema;
 
 use atk4\core\Exception;
+use atk4\data\Field;
 use atk4\data\Field_SQL_Expression;
 use atk4\Data\Model;
 use atk4\data\Persistence;
@@ -12,6 +13,10 @@ use atk4\dsql\Expression;
 
 class Migration extends Expression
 {
+    public const REF_TYPE_NONE = 0;
+    public const REF_TYPE_LINK = 1;
+    public const REF_TYPE_PRIMARY = 2;
+
     /** @var string Expression mode. See $templates. */
     public $mode = 'create';
 
@@ -35,13 +40,13 @@ class Migration extends Expression
     protected $escape_char = '"';
 
     /** @var string Expression to create primary key */
-    public $primary_key_expr = 'integer primary key autoincrement';
+    public $primary_key_expr = 'primary key autoincrement';
 
     /** @var array Conversion mapping from Agile Data types to persistence types */
     protected $defaultMapToPersistence = [
         ['varchar', 255], // default
         'boolean'   => ['tinyint', 1],
-        'integer'   => ['int'],
+        'integer'   => ['bigint'],
         'money'     => ['decimal', 12, 2],
         'float'     => ['decimal', 16, 6],
         'date'      => ['date'],
@@ -60,6 +65,8 @@ class Migration extends Expression
         [null], // default
         'tinyint'   => ['boolean'],
         'int'       => ['integer'],
+        'integer'   => ['integer'],
+        'bigint'    => ['integer'],
         'decimal'   => ['float'],
         'numeric'   => ['float'],
         'date'      => ['date'],
@@ -193,44 +200,62 @@ class Migration extends Expression
             }
 
             if ($field->short_name == $m->id_field) {
-                $this->id($field->actual ?: $field->short_name);
-                continue;
+                $ref_type = self::REF_TYPE_PRIMARY;
+                $persist_field = $field;
+            } else {
+                $ref_field = $this->getReferenceField($field);
+                $ref_type = $ref_field !== null ? self::REF_TYPE_LINK : $ref_type = self::REF_TYPE_NONE;
+                $persist_field = $ref_field ?? $field;
             }
 
-            // get field type from field
-            $type = $field->type;
+            $options = [
+                'type'      => $ref_type !== self::REF_TYPE_NONE && empty($persist_field->type) ? 'integer' : $persist_field->type,
+                'ref_type'  => $ref_type,
+                'mandatory' => $persist_field->mandatory || $persist_field->required,
+                // todo add more options here
+            ];
 
-            // if the field is a hasOne relation
-            // Don't have the right FieldType
-            // FieldType is stored in the reference field
-            if ($field->reference instanceof HasOne) {
-
-                // @TODO if this can be done better?
-
-                // i don't want to :
-                // - change the isolation of relation link
-                // - expose the protected property ->their_field
-                // i need the type of the field to be used in this table
-                $reflection = new \ReflectionClass($field->reference);
-                $property = $reflection->getProperty('their_field');
-                $property->setAccessible(true);
-
-                /** @var string $reference_their_field get Reflection protected property Reference->their_field */
-                $reference_their_field = $property->getValue($field->reference);
-
-                /** @var string $reference_field reference field name */
-                $reference_field = $reference_their_field ?? $field->reference->owner->id_field;
-
-                /** @var string $reference_model_class reference class fqcn */
-                $reference_model_class = $field->reference->model;
-
-                $type = (new $reference_model_class($m->persistence))->getField($reference_field)->type ?? 'integer';
-            }
-
-            $this->field($field->actual ?: $field->short_name, ['type' => $type]);  // todo add more options here
+            $this->field($field->actual ?: $field->short_name, $options);
         }
 
         return $m;
+    }
+
+    protected function getReferenceField(Field $field): ?Field
+    {
+        // if the field is a hasOne relation
+        // Don't have the right FieldType
+        // FieldType is stored in the reference field
+        if ($field->reference instanceof HasOne) {
+
+            // @TODO if this can be done better?
+
+            // i don't want to :
+            // - change the isolation of relation link
+            // - expose the protected property ->their_field
+            // i need the type of the field to be used in this table
+            $reflection = new \ReflectionClass($field->reference);
+            $property = $reflection->getProperty('their_field');
+            $property->setAccessible(true);
+
+            /** @var string $reference_their_field get Reflection protected property Reference->their_field */
+            $reference_their_field = $property->getValue($field->reference);
+
+            /** @var string $reference_field reference field name */
+            $reference_field = $reference_their_field ?? $field->reference->owner->id_field;
+
+            /** @var string $reference_model_class reference class fqcn */
+            $reference_model_class = $field->reference->model;
+
+            // @TODO fix, but without the dummy persistence, the following is shown:
+            // Uncaught atk4\core\Exception: Element is not found in collection
+            // for ID column
+            $dummyPersistence = new Persistence\SQL($this->connection);
+
+            return (new $reference_model_class($dummyPersistence))->getField($reference_field);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -554,14 +579,32 @@ class Migration extends Expression
      *
      * @return string|null
      */
-    public function getSQLFieldType(?string $type, ?array $options = null): ?string
+    public function getSQLFieldType(?string $type, array $options = []): ?string
     {
         $type = strtolower($type);
 
         $map = array_merge($this->defaultMapToPersistence, $this->mapToPersistence);
         $a = array_key_exists($type, $map) ? $map[$type] : $map[0];
 
-        return $a[0].(count($a) > 1 ? ' ('.implode(',', array_slice($a, 1)).')' : '');
+        $res = $a[0];
+        if (count($a) > 1) {
+            $res .= ' ('.implode(',', array_slice($a, 1)).')';
+        }
+
+        if (!empty($options['ref_type']) && $options['ref_type'] !== self::REF_TYPE_NONE && $type === 'integer') {
+            $res .= ' unsigned';
+        }
+
+        if (!empty($options['mandatory'])
+                || (!empty($options['ref_type']) && $options['ref_type'] === self::REF_TYPE_PRIMARY)) {
+            $res .= ' not null';
+        }
+
+        if (!empty($options['ref_type']) && $options['ref_type'] === self::REF_TYPE_PRIMARY) {
+            $res .= ' '.$this->primary_key_expr;
+        }
+
+        return $res;
     }
 
     /**
@@ -579,14 +622,16 @@ class Migration extends Expression
         $has_fields = false;
         foreach ($this->describeTable($table) as $row) {
             $has_fields = true;
-            if ($row['pk']) {
-                $this->id($row['name']);
-                continue;
-            }
 
             $type = $this->getModelFieldType($row['type']);
+            $ref_type = $row['pk'] ? self::REF_TYPE_PRIMARY : self::REF_TYPE_NONE;
 
-            $this->field($row['name'], ['type'=>$type]);
+            $options = [
+                'type'     => $type,
+                'ref_type' => $ref_type,
+            ];
+
+            $this->field($row['name'], $options);
         }
 
         return $has_fields;
@@ -647,14 +692,12 @@ class Migration extends Expression
      */
     public function id($name = null)
     {
-        if (!$name) {
-            $name = 'id';
-        }
+        $options = [
+            'type'     => 'integer',
+            'ref_type' => self::REF_TYPE_PRIMARY,
+        ];
 
-        $val = $this->connection->expr($this->primary_key_expr);
-
-        $this->args['field'] =
-            [$name => $val] + (isset($this->args['field']) ? $this->args['field'] : []);
+        $this->field($name ?? 'id', $options);
 
         return $this;
     }
