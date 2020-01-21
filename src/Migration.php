@@ -351,10 +351,14 @@ class Migration extends Expression
 
                 // compare options and if needed alter field
                 // @todo add more options here like 'len'
-                if (array_key_exists('type', $old[$field]) && array_key_exists('type', $options) && $old[$field]['type'] != $options['type']) {
-                    $this->alterField($field, $options);
-                    $altered++;
-                    $changes++;
+                if (array_key_exists('type', $old[$field]) && array_key_exists('type', $options)) {
+                    $oldSQLFieldType = $this->getSQLFieldType($old[$field]['type']);
+                    $newSQLFieldType = $this->getSQLFieldType($options['type']);
+                    if ($oldSQLFieldType !== $newSQLFieldType) {
+                        $this->alterField($field, $options);
+                        $altered++;
+                        $changes++;
+                    }
                 }
 
                 unset($old[$field]);
