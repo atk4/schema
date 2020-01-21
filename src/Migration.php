@@ -381,9 +381,9 @@ class Migration extends Expression
         if ($changes) {
             $this->alter();
 
-            return 'added '.$added.' field'.($added % 10 == 1 ? '' : 's').', '.
-                'changed '.$altered.' field'.($altered % 10 == 1 ? '' : 's').' and '.
-                'deleted '.$dropped.' field'.($dropped % 10 == 1 ? '' : 's');
+            return 'added '.$added.' field'.($added == 1 ? '' : 's').', '.
+                'changed '.$altered.' field'.($altered == 1 ? '' : 's').' and '.
+                'deleted '.$dropped.' field'.($dropped == 1 ? '' : 's');
         }
 
         return 'no changes';
