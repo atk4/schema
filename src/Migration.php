@@ -211,7 +211,7 @@ class Migration extends Expression
             $options = [
                 'type'      => $ref_type !== self::REF_TYPE_NONE && empty($persist_field->type) ? 'integer' : $persist_field->type,
                 'ref_type'  => $ref_type,
-                'mandatory' => $persist_field->mandatory || $persist_field->required,
+                'mandatory' => ($field->mandatory || $field->required) && ($persist_field->mandatory || $persist_field->required),
                 // todo add more options here
             ];
 
