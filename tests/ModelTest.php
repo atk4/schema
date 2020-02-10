@@ -13,7 +13,7 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
         $migration->create();
 
         // now we can use user
-        $user->save(['name'=>'john', 'is_admin'=>true, 'notes'=>'some long notes']);
+        $user->save(['name' => 'john', 'is_admin' => true, 'notes' => 'some long notes']);
     }
 
     public function testImportTable()
@@ -23,17 +23,17 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
         $m = $this->getMigration();
         $m->table('user')->id()
             ->field('foo')
-            ->field('str', ['type'=>'string'])
-            ->field('bool', ['type'=>'boolean'])
-            ->field('int', ['type'=>'integer'])
-            ->field('mon', ['type'=>'money'])
-            ->field('flt', ['type'=>'float'])
-            ->field('date', ['type'=>'date'])
-            ->field('datetime', ['type'=>'datetime'])
-            ->field('time', ['type'=>'time'])
-            ->field('txt', ['type'=>'text'])
-            ->field('arr', ['type'=>'array'])
-            ->field('obj', ['type'=>'object'])
+            ->field('str', ['type' => 'string'])
+            ->field('bool', ['type' => 'boolean'])
+            ->field('int', ['type' => 'integer'])
+            ->field('mon', ['type' => 'money'])
+            ->field('flt', ['type' => 'float'])
+            ->field('date', ['type' => 'date'])
+            ->field('datetime', ['type' => 'datetime'])
+            ->field('time', ['type' => 'time'])
+            ->field('txt', ['type' => 'text'])
+            ->field('arr', ['type' => 'array'])
+            ->field('obj', ['type' => 'object'])
             ->create();
         $this->db->dsql()->table('user')
             ->set([
@@ -47,9 +47,9 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
                 'date'     => (new \DateTime())->format('Y-m-d'),
                 'datetime' => (new \DateTime())->format('Y-m-d H:i:s'),
                 'time'     => (new \DateTime())->format('H:i:s'),
-                'txt'      => 'very long text value'.str_repeat('-=#', 1000), // 3000+ chars
-                'arr'      => 'very long text value'.str_repeat('-=#', 1000), // 3000+ chars
-                'obj'      => 'very long text value'.str_repeat('-=#', 1000), // 3000+ chars
+                'txt'      => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
+                'arr'      => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
+                'obj'      => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
             ])->insert();
 
         $m2 = $this->getMigration();
@@ -67,15 +67,15 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
         if ($this->driver == 'sqlite') {
             // SQLite doesn't support DROP COLUMN in ALTER TABLE
             // http://www.sqlitetutorial.net/sqlite-alter-table/
-            $this->markTestIncomplete('This test is not supported on '.$this->driver);
+            $this->markTestIncomplete('This test is not supported on ' . $this->driver);
         }
 
         $this->dropTable('user');
         $m = $this->getMigration($this->db);
         $m->table('user')->id()
             ->field('foo')
-            ->field('bar', ['type'=>'integer'])
-            ->field('baz', ['type'=>'text'])
+            ->field('bar', ['type' => 'integer'])
+            ->field('baz', ['type' => 'text'])
             ->create();
         $this->db->dsql()->table('user')
             ->set([
@@ -88,7 +88,7 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
         $m2 = $this->getMigration($this->db);
         $m2->table('user')->id()
             ->field('xx')
-            ->field('bar', ['type'=>'integer'])
+            ->field('bar', ['type' => 'integer'])
             ->field('baz')
             ->migrate();
     }
@@ -101,13 +101,14 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
         $m = $this->getMigration($this->db);
         $user_model = $m->createModel($this->db, 'user');
 
-        $this->assertEquals([
+        $this->assertEquals(
+            [
             'name',
             'password',
             'is_admin',
             'notes',
             'main_role_id', // our_field here not role_id (reference name)
-        ],
+            ],
             array_keys($user_model->getFields())
         );
     }
@@ -122,9 +123,9 @@ class TestUser extends \atk4\data\Model
         parent::init();
 
         $this->addField('name');
-        $this->addField('password', ['type'=>'password']);
-        $this->addField('is_admin', ['type'=>'boolean']);
-        $this->addField('notes', ['type'=>'text']);
+        $this->addField('password', ['type' => 'password']);
+        $this->addField('is_admin', ['type' => 'boolean']);
+        $this->addField('notes', ['type' => 'text']);
 
         $this->hasOne('role_id', [TestRole::class, 'our_field' => 'main_role_id', 'their_field' => 'id']);
     }

@@ -66,22 +66,22 @@ class PgSQL extends \atk4\schema\Migration
 
         if (isset($this->args['dropField'])) {
             foreach ($this->args['dropField'] as $field => $junk) {
-                $result[] = 'drop column '.$this->_escape($field);
+                $result[] = 'drop column ' . $this->_escape($field);
             }
         }
 
         if (isset($this->args['newField'])) {
             foreach ($this->args['newField'] as $field => $option) {
-                $result[] = 'add column '.$this->_render_one_field($field, $option);
+                $result[] = 'add column ' . $this->_render_one_field($field, $option);
             }
         }
 
         if (isset($this->args['alterField'])) {
             foreach ($this->args['alterField'] as $field => $option) {
                 $type = $this->getSQLFieldType($option['type'] ?? null, $option);
-                $result[] = 'alter column '.$this->_escape($field).
-                                ' type '.$type.
-                                ' using ('.$this->_escape($field).'::'.$type.')'; // requires to cast value
+                $result[] = 'alter column ' . $this->_escape($field) .
+                                ' type ' . $type .
+                                ' using (' . $this->_escape($field) . '::' . $type . ')'; // requires to cast value
             }
         }
 
