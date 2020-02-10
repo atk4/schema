@@ -408,9 +408,9 @@ class Migration extends Expression
         if ($changes) {
             $this->alter();
 
-            return 'added ' . $added . ' field' . ($added == 1 ? '' : 's') . ', ' .
-                'changed ' . $altered . ' field' . ($altered == 1 ? '' : 's') . ' and ' .
-                'deleted ' . $dropped . ' field' . ($dropped == 1 ? '' : 's');
+            return 'added '.$added.' field'.($added == 1 ? '' : 's').', '.
+                'changed '.$altered.' field'.($altered == 1 ? '' : 's').' and '.
+                'deleted '.$dropped.' field'.($dropped == 1 ? '' : 's');
         }
 
         return 'no changes';
@@ -427,19 +427,19 @@ class Migration extends Expression
 
         if (isset($this->args['dropField'])) {
             foreach ($this->args['dropField'] as $field => $junk) {
-                $result[] = 'drop column ' . $this->_escape($field);
+                $result[] = 'drop column '.$this->_escape($field);
             }
         }
 
         if (isset($this->args['newField'])) {
             foreach ($this->args['newField'] as $field => $option) {
-                $result[] = 'add column ' . $this->_render_one_field($field, $option);
+                $result[] = 'add column '.$this->_render_one_field($field, $option);
             }
         }
 
         if (isset($this->args['alterField'])) {
             foreach ($this->args['alterField'] as $field => $option) {
-                $result[] = 'change column ' . $this->_escape($field) . ' ' . $this->_render_one_field($field, $option);
+                $result[] = 'change column '.$this->_escape($field).' '.$this->_render_one_field($field, $option);
             }
         }
 
@@ -586,7 +586,7 @@ class Migration extends Expression
 
         $res = $a[0];
         if (count($a) > 1) {
-            $res .= ' (' . implode(',', array_slice($a, 1)) . ')';
+            $res .= ' ('.implode(',', array_slice($a, 1)).')';
         }
 
         if (!empty($options['ref_type']) && $options['ref_type'] !== self::REF_TYPE_NONE && $type === 'integer') {
@@ -601,7 +601,7 @@ class Migration extends Expression
         }
 
         if (!empty($options['ref_type']) && $options['ref_type'] === self::REF_TYPE_PRIMARY) {
-            $res .= ' ' . $this->primary_key_expr;
+            $res .= ' '.$this->primary_key_expr;
         }
 
         return $res;
@@ -722,7 +722,7 @@ class Migration extends Expression
 
         foreach ($this->args['field'] as $field => $options) {
             if ($options instanceof Expression) {
-                $ret[] = $this->_escape($field) . ' ' . $this->_consume($options);
+                $ret[] = $this->_escape($field).' '.$this->_consume($options);
                 continue;
             }
 
@@ -745,7 +745,7 @@ class Migration extends Expression
         $name = $options['name'] ?? $field;
         $type = $this->getSQLFieldType($options['type'] ?? null, $options);
 
-        return $this->_escape($name) . ' ' . $type;
+        return $this->_escape($name).' '.$type;
     }
 
     /**
@@ -776,7 +776,7 @@ class Migration extends Expression
             // don't allow multiple values with same alias
             if (isset($this->args[$what][$alias])) {
                 throw new Exception([
-                    ucfirst($what) . ' alias should be unique',
+                    ucfirst($what).' alias should be unique',
                     'alias' => $alias,
                 ]);
             }

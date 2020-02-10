@@ -32,7 +32,7 @@ class MigratorConsole extends \atk4\ui\Console
                 $m = new $this->migrator_class($model);
                 $result = $m->migrate();
 
-                $c->debug('  ' . get_class($model) . '.. ' . $result);
+                $c->debug('  '.get_class($model).'.. '.$result);
             }
 
             $c->notice('Done with migration');

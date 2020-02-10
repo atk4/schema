@@ -47,9 +47,9 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
                 'date'     => (new \DateTime())->format('Y-m-d'),
                 'datetime' => (new \DateTime())->format('Y-m-d H:i:s'),
                 'time'     => (new \DateTime())->format('H:i:s'),
-                'txt'      => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
-                'arr'      => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
-                'obj'      => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
+                'txt'      => 'very long text value'.str_repeat('-=#', 1000), // 3000+ chars
+                'arr'      => 'very long text value'.str_repeat('-=#', 1000), // 3000+ chars
+                'obj'      => 'very long text value'.str_repeat('-=#', 1000), // 3000+ chars
             ])->insert();
 
         $m2 = $this->getMigration();
@@ -67,7 +67,7 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
         if ($this->driver == 'sqlite') {
             // SQLite doesn't support DROP COLUMN in ALTER TABLE
             // http://www.sqlitetutorial.net/sqlite-alter-table/
-            $this->markTestIncomplete('This test is not supported on ' . $this->driver);
+            $this->markTestIncomplete('This test is not supported on '.$this->driver);
         }
 
         $this->dropTable('user');
@@ -103,11 +103,11 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
 
         $this->assertEquals(
             [
-            'name',
-            'password',
-            'is_admin',
-            'notes',
-            'main_role_id', // our_field here not role_id (reference name)
+                'name',
+                'password',
+                'is_admin',
+                'notes',
+                'main_role_id', // our_field here not role_id (reference name)
             ],
             array_keys($user_model->getFields())
         );
