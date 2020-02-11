@@ -2,7 +2,15 @@
   "name": "atk4/schema",
   "type": "library",
   "description": "Agile Schema",
-  "keywords": ["agile", "schema", "data", "migration", "alter", "sql", "framework"],
+  "keywords": [
+    "agile",
+    "schema",
+    "data",
+    "migration",
+    "alter",
+    "sql",
+    "framework"
+  ],
   "homepage": "http://github.com/atk4/schema",
   "license": "MIT",
   "minimum-stability": "dev",
@@ -51,11 +59,13 @@
     "jdorn/sql-formatter": "*"
   },
   "autoload": {
-    "psr-4": {"atk4\\schema\\":"src/"}
+    "psr-4": {
+      "atk4\\schema\\":"src/"
+    }
   },
   "autoload-dev": {
     "psr-4": {
-      "atk4\\schema\\tests\\":"tests/"
+      "atk4\\schema\\tests\\": "tests/"
     }
   }
 }
