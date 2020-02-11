@@ -13,7 +13,7 @@ class MySQL extends \atk4\schema\Migration
     protected $escape_char = '`';
 
     /** @var string Expression to create primary key */
-    public $primary_key_expr = 'integer primary key auto_increment';
+    public $primary_key_expr = 'primary key auto_increment';
 
     /** @var array use this array in extended classes to overwrite or extend values of default mapping */
     public $mapToPersistence = [
@@ -37,7 +37,7 @@ class MySQL extends \atk4\schema\Migration
      *
      * @return array
      */
-    public function describeTable(string $table) : array
+    public function describeTable(string $table): array
     {
         if (!$this->connection->expr('show tables like []', [$table])->get()) {
             return []; // no such table
