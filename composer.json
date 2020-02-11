@@ -60,7 +60,7 @@
   },
   "autoload": {
     "psr-4": {
-      "atk4\\schema\\":"src/"
+      "atk4\\schema\\": "src/"
     }
   },
   "autoload-dev": {
