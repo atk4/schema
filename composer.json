@@ -1,61 +1,61 @@
 {
-    "name": "atk4/schema",
-    "type": "library",
-    "description": "Agile Schema",
-    "keywords": ["agile", "schema", "data", "migration", "alter", "sql", "framework"],
-    "homepage": "http://github.com/atk4/schema",
-    "license": "MIT",
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "authors": [
-        {
-            "name": "Romans Malinovskis",
-            "email": "romans@agiletoolkit.org",
-            "homepage": "https://nearly.guru/"
-        }
-    ],
-    "require": {
-        "php": ">=7.2.0",
-        "atk4/dsql": "dev-develop"
-    },
-    "require-release": {
-        "php": ">=7.2.0",
-        "atk4/dsql": "^2.0"
-    },
-    "require-dev": {
-        "atk4/data": "dev-develop",
-        "atk4/ui": "dev-develop",
-        "phpunit/phpunit": "<6",
-        "phpunit/dbunit": ">=1.2",
-        "phpunit/phpcov": "*",
-        "codeclimate/php-test-reporter": "*",
-        "squizlabs/php_codesniffer": "^3.5"
-    },
-    "require-dev-release": {
-        "atk4/data": "^2.0",
-        "atk4/ui": "^2.0",
-        "phpunit/phpunit": "<6",
-        "phpunit/dbunit": ">=1.2",
-        "phpunit/phpcov": "*",
-        "codeclimate/php-test-reporter": "*",
-        "squizlabs/php_codesniffer": "^3.5"
-    },
-    "suggest": {
-        "atk4/data": "dev-develop",
-        "atk4/ui": "dev-develop",
-        "jdorn/sql-formatter": "*"
-    },
-    "suggest-release": {
-        "atk4/data": "^2.0",
-        "atk4/ui": "^2.0",
-        "jdorn/sql-formatter": "*"
-    },
-    "autoload": {
-        "psr-4": {"atk4\\schema\\":"src/"}
-    },
-    "autoload-dev": {
-        "psr-4": {
-          "atk4\\schema\\tests\\":"tests/"
-        }
+  "name": "atk4/schema",
+  "type": "library",
+  "description": "Agile Schema",
+  "keywords": ["agile", "schema", "data", "migration", "alter", "sql", "framework"],
+  "homepage": "http://github.com/atk4/schema",
+  "license": "MIT",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "authors": [
+    {
+      "name": "Romans Malinovskis",
+      "email": "romans@agiletoolkit.org",
+      "homepage": "https://nearly.guru/"
     }
+  ],
+  "require": {
+    "php": ">=7.2.0",
+    "atk4/dsql": "dev-develop"
+  },
+  "require-release": {
+    "php": ">=7.2.0",
+    "atk4/dsql": "^2.0"
+  },
+  "require-dev": {
+    "atk4/data": "dev-develop",
+    "atk4/ui": "dev-develop",
+    "phpunit/phpunit": "<6",
+    "phpunit/dbunit": ">=1.2",
+    "phpunit/phpcov": "*",
+    "codeclimate/php-test-reporter": "*",
+    "squizlabs/php_codesniffer": "^3.5"
+  },
+  "require-dev-release": {
+    "atk4/data": "^2.0",
+    "atk4/ui": "^2.0",
+    "phpunit/phpunit": "<6",
+    "phpunit/dbunit": ">=1.2",
+    "phpunit/phpcov": "*",
+    "codeclimate/php-test-reporter": "*",
+    "squizlabs/php_codesniffer": "^3.5"
+  },
+  "suggest": {
+    "atk4/data": "dev-develop",
+    "atk4/ui": "dev-develop",
+    "jdorn/sql-formatter": "*"
+  },
+  "suggest-release": {
+    "atk4/data": "^2.0",
+    "atk4/ui": "^2.0",
+    "jdorn/sql-formatter": "*"
+  },
+  "autoload": {
+    "psr-4": {"atk4\\schema\\":"src/"}
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "atk4\\schema\\tests\\":"tests/"
+    }
+  }
 }
