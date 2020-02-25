@@ -33,28 +33,39 @@ The user will see a console which would adjust database to contain required tabl
 Of course it's also possible to perform migration without visual feedback:
 
 ``` php
-$changes = (\atk4\schema\Migration::getMigration(new User($app->db)))->migrate();
+$changes = \atk4\schema\Migration::of(new User($app->db))->run();
 ```
 
 If you need a more fine-graned migration, you can define them in great detail.
 
 ``` php
 // create table
-$migration = \atk4\schema\Migration::getMigration($app->db);
-$migration->table('user')
+$migrator = \atk4\schema\Migration::of($app->db);
+$migrator->table('user')
     ->id()
     ->field('name')
     ->field('address', ['type'=>'text']);
     ->create();
 
 // or alter
-$migration = \atk4\schema\Migration::getMigration($app->db);
-$migration->table('user')
+$migrator = \atk4\schema\Migration::of($app->db);
+$migrator->table('user')
     ->newField('age', ['type'=>'integer'])
     ->alter();
 ```
 
-Currently we fully support MySQL and SQLite connections, partly PgSQL and Oracle connections. Other SQL databases are not yet supported.
+Currently atk4/schema fully supports MySQL and SQLite connections, partly PgSQL and Oracle connections.
+Other SQL databases are not yet natively supported but you can register your migrator class at runtime.
+
+``` php
+
+// $dbDriver is the connection driver name
+// MyCustomMigrator::class should be extending \atk4\schema\Migration
+
+\atk4\schema\Migration::register($dbDriver, MyCustomMigrator::class);
+
+```
+
 Field declaration uses same types as [ATK Data](https://github.com/atk4/data).
 
 ## Examples
@@ -64,13 +75,13 @@ queries using DSQL.
 
 ``` php
 <?php
-$m = \atk4\data\schema\Migration::getMigration($connection);
-$m->table('user')->drop();
-$m->field('id');
-$m->field('name', ['type'=>'string']);
-$m->field('age', ['type'=>'integer']);
-$m->field('bio');
-$m->create();
+$migrator = \atk4\data\schema\Migration::of($connection);
+$migrator->table('user')->drop();
+$migrator->field('id');
+$migrator->field('name', ['type'=>'string']);
+$migrator->field('age', ['type'=>'integer']);
+$migrator->field('bio');
+$migrator->create();
 ```
 
 `schema\Snapshot` (NOT IMPLEMENTED) is a simple class that can record and restore

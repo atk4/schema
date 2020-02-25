@@ -12,15 +12,15 @@ class User extends \atk4\data\Model
     }
 }
 
-$m = new User($db, 'user');
+$user = new User($db, 'user');
 
 try {
-    // apply migrator
-    (\atk4\schema\Migration::getMigration($m))->migrate();
+    // run migrator
+    \atk4\schema\Migration::of($user)->run();
 
     // ok, now we surely have DB!
 
-    $m->save([
+    $user->save([
         'name' => 'John'.rand(1, 100),
     ]);
 } catch (\atk4\core\Exception $e) {

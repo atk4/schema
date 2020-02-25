@@ -2,7 +2,17 @@
 
 namespace atk4\schema\tests;
 
+use atk4\core\Exception;
+use atk4\schema\Migration;
 use atk4\schema\PHPUnit_SchemaTestCase;
+
+class CustomMySQLMigrator extends Migration
+{
+}
+
+class CustomMigrator
+{
+}
 
 class BasicTest extends PHPUnit_SchemaTestCase
 {
@@ -12,8 +22,8 @@ class BasicTest extends PHPUnit_SchemaTestCase
     public function testCreateAndAlter()
     {
         $this->dropTable('user');
-        $m = $this->getMigration();
-        $m->table('user')->id()
+
+        $this->getMigrator()->table('user')->id()
             ->field('foo')
             ->field('bar', ['type' => 'integer'])
             ->field('baz', ['type' => 'text'])
@@ -27,8 +37,7 @@ class BasicTest extends PHPUnit_SchemaTestCase
             ->field('en', ['type' => 'enum'])
             ->create();
 
-        $m = $this->getMigration();
-        $m->table('user')
+        $this->getMigrator()->table('user')
             ->newField('zed', ['type' => 'integer'])
             ->alter();
     }
@@ -43,8 +52,8 @@ class BasicTest extends PHPUnit_SchemaTestCase
         }
 
         $this->dropTable('user');
-        $m = $this->getMigration();
-        $m->table('user')->id()
+
+        $this->getMigrator()->table('user')->id()
             ->field('foo')
             ->field('bar', ['type' => 'integer'])
             ->field('baz', ['type' => 'text'])
@@ -58,9 +67,46 @@ class BasicTest extends PHPUnit_SchemaTestCase
             ->field('en', ['type' => 'enum'])
             ->create();
 
-        $m = $this->getMigration();
-        $m->table('user')
+        $this->getMigrator()->table('user')
             ->dropField('bar', ['type' => 'integer'])
             ->alter();
+    }
+
+    /**
+     * Tests creating direct migrator.
+     */
+    public function testDirectMigratorResolving()
+    {
+        $migrator = $this->getMigrator();
+
+        $migratorClass = get_class($migrator);
+
+        $directMigrator = $migratorClass::of($this->db);
+
+        $this->assertEquals($migratorClass, get_class($directMigrator));
+    }
+
+    /**
+     * Tests registering migrator.
+     */
+    public function testMigratorRegistering()
+    {
+        // get original migrator registration
+        $origMigratorClass = get_class($this->getMigrator());
+
+        Migration::register($this->driver, CustomMySQLMigrator::class);
+
+        $this->assertEquals(CustomMySQLMigrator::class, get_class($this->getMigrator()));
+
+        CustomMySQLMigrator::register($this->driver);
+
+        $this->assertEquals(CustomMySQLMigrator::class, get_class($this->getMigrator()));
+
+        // restore original migrator registration
+        Migration::register($this->driver, $origMigratorClass);
+
+        $this->expectException(Exception::class);
+
+        Migration::register($this->driver, CustomMigrator::class);
     }
 }

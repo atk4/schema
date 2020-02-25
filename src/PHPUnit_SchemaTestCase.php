@@ -32,9 +32,9 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         parent::setUp();
 
         // establish connection
-        $this->dsn = ($this->debug ? ('dumper:') : '').(isset($GLOBALS['DB_DSN']) ? $GLOBALS['DB_DSN'] : 'sqlite::memory:');
-        $user = isset($GLOBALS['DB_USER']) ? $GLOBALS['DB_USER'] : null;
-        $pass = isset($GLOBALS['DB_PASSWD']) ? $GLOBALS['DB_PASSWD'] : null;
+        $this->dsn = ($this->debug ? ('dumper:') : '').($GLOBALS['DB_DSN'] ?? 'sqlite::memory:');
+        $user = $GLOBALS['DB_USER'] ?? null;
+        $pass = $GLOBALS['DB_PASSWD'] ?? null;
 
         $this->db = Persistence::connect($this->dsn, $user, $pass);
         $this->driver = $this->db->connection->driver;
@@ -54,9 +54,9 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
      *
      * @return Migration
      */
-    public function getMigration($m = null)
+    public function getMigrator($model = null)
     {
-        return \atk4\schema\Migration::getMigration($m ?: $this->db);
+        return \atk4\schema\Migration::of($model ?: $this->db);
     }
 
     /**
@@ -67,7 +67,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
      */
     public function dropTable($table)
     {
-        $this->getMigration()->table($table)->drop();
+        $this->getMigrator()->table($table)->drop();
     }
 
     /**
@@ -82,59 +82,59 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 
         // create tables
         foreach ($db_data as $table => $data) {
-            $s = $this->getMigration();
+            $migrator = $this->getMigrator();
 
             // drop table
-            $s->table($table)->drop();
+            $migrator->table($table)->drop();
 
             // create table and fields from first row of data
             $first_row = current($data);
             if ($first_row) {
                 foreach ($first_row as $field => $row) {
                     if ($field === 'id') {
-                        $s->id('id');
+                        $migrator->id('id');
                         continue;
                     }
 
                     if (is_int($row)) {
-                        $s->field($field, ['type' => 'integer']);
+                        $migrator->field($field, ['type' => 'integer']);
                         continue;
                     } elseif (is_float($row)) {
-                        $s->field($field, ['type' => 'numeric(10,5)']);
+                        $migrator->field($field, ['type' => 'numeric(10,5)']);
                         continue;
                     } elseif ($row instanceof \DateTime) {
-                        $s->field($field, ['type' => 'datetime']);
+                        $migrator->field($field, ['type' => 'datetime']);
                         continue;
                     }
 
-                    $s->field($field);
+                    $migrator->field($field);
                 }
             }
 
             if (!isset($first_row['id'])) {
-                $s->id();
+                $migrator->id();
             }
 
-            $s->create();
+            $migrator->create();
 
             // import data
             if ($import_data) {
                 $has_id = (bool) key($data);
 
                 foreach ($data as $id => $row) {
-                    $s = $this->db->dsql();
+                    $migrator = $this->db->dsql();
                     if ($id === '_') {
                         continue;
                     }
 
-                    $s->table($table);
-                    $s->set($row);
+                    $migrator->table($table);
+                    $migrator->set($row);
 
                     if (!isset($row['id']) && $has_id) {
-                        $s->set('id', $id);
+                        $migrator->set('id', $id);
                     }
 
-                    $s->insert();
+                    $migrator->insert();
                 }
             }
         }
@@ -150,9 +150,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
      */
     public function getDB($tables = null, $no_id = false)
     {
-        if (!$tables) {
-            $tables = $this->tables;
-        }
+        $tables = $tables ?: $this->tables;
 
         if (is_string($tables)) {
             $tables = array_map('trim', explode(',', $tables));

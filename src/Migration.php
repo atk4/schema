@@ -79,6 +79,32 @@ class Migration extends Expression
     public $mapToAgile = [];
 
     /**
+     * Stores migrator class to use based on driver.
+     *
+     * Visibility is intentionally set to private.
+     * If generic class Migration::of($source) is called, the migrator class will be resolved based on driver of $source.
+     * When specific migrator class e.g Migration\MySQL::of($source) is called, driver will not be resolved (the $registry property is NOT visible).
+     * MySQL migrator class will be used explicitly.
+     *
+     * @var array
+     *
+     * */
+    private static $registry = [
+        'sqlite' => Migration\SQLite::class,
+        'mysql'  => Migration\MySQL::class,
+        'pgsql'  => Migration\PgSQL::class,
+        'oci'    => Migration\Oracle::class,
+    ];
+
+    /**
+     * @deprecated use Migration::of instead
+     */
+    public static function getMigration($source, $params = []): self
+    {
+        return self::of($source, $params);
+    }
+
+    /**
      * Factory method to get correct Migration subclass object depending on connection given.
      *
      * @param Connection|Persistence|Model $source
@@ -88,26 +114,60 @@ class Migration extends Expression
      *
      * @return Migration Subclass
      */
-    public static function getMigration($source, $params = []): self
+    public static function of($source, $params = []): self
     {
-        $c = static::getConnection($source);
+        $connection = static::getConnection($source);
 
-        switch ($c->driver) {
-            case 'sqlite':
-                return new Migration\SQLite($source, $params);
-            case 'mysql':
-                return new Migration\MySQL($source, $params);
-            case 'pgsql':
-                return new Migration\PgSQL($source, $params);
-            case 'oci':
-                return new Migration\Oracle($source, $params);
-            default:
-                throw new Exception([
-                    'Not sure which migration class to use for your DSN',
-                    'driver' => $c->driver,
-                    'source' => $source,
-                ]);
+        $migrator = self::$registry[$connection->driver] ?? static::class;
+
+        // if used within a subclass Migration method will create migrator of that class
+        // if $migrator class is the generic class Migration then migrator was not resolved correctly
+        if ($migrator == __CLASS__) {
+            throw new Exception([
+                'Not sure which migration class to use for your DSN',
+                'driver' => $connection->driver,
+                'source' => $source,
+            ]);
         }
+
+        return new $migrator($source, $params);
+    }
+
+    /**
+     * Adds migrator class to the registry for resolving in Migration::of method.
+     *
+     * Can be used as:
+     *
+     * Migration::register('mysql', CustomMigration\MySQL), or
+     * CustomMigration\MySQL::register('mysql')
+     *
+     * CustomMigration\MySQL must be descendant of Migration class.
+     *
+     * @param string $driver
+     * @param string $migrator
+     */
+    public static function register($driver, $migrator = null)
+    {
+        // forward to generic Migration::register if called with a descendant class e.g Migration\MySQL::register
+        if (static::class !== __CLASS__) {
+            return call_user_func([__CLASS__, 'register'], $driver, $migrator ?: static::class);
+        } elseif (!$migrator) {
+            throw new Exception(['Cannot register generic Migration class', 'driver' => $driver]);
+        }
+
+        if (!is_subclass_of($migrator, self::class)) {
+            throw new Exception(['Migrator must be descendant to generic Migration class', 'migrator' => $migrator]);
+        }
+
+        if (is_array($drivers = $driver)) {
+            foreach ($drivers as $driver => $migrator) {
+                // self must be used instead of static as $registry property is private
+                // it is available only to generic Migrator class
+                self::register($driver, $migrator);
+            }
+        }
+
+        self::$registry[$driver] = $migrator;
     }
 
     /**
@@ -339,6 +399,14 @@ class Migration extends Expression
     }
 
     /**
+     * @deprecated use Migration::run instead
+     */
+    public function migrate(): string
+    {
+        return $this->run();
+    }
+
+    /**
      * Will read current schema and consult current 'field' arguments, to see if they are matched.
      * If table does not exist, will invoke ->create. If table does exist, then it will execute
      * methods ->newField(), ->dropField() or ->alterField() as needed, then call ->alter().
@@ -347,7 +415,7 @@ class Migration extends Expression
      *
      * @return string Returns short textual info for logging purposes
      */
-    public function migrate(): string
+    public function run(): string
     {
         $changes = $added = $altered = $dropped = 0;
 

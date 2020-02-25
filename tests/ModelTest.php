@@ -9,8 +9,7 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
         $this->dropTable('user');
         $user = new TestUser($this->db);
 
-        $migration = $this->getMigration($user);
-        $migration->create();
+        $this->getMigrator($user)->create();
 
         // now we can use user
         $user->save(['name' => 'john', 'is_admin' => true, 'notes' => 'some long notes']);
@@ -20,8 +19,9 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
     {
         $this->dropTable('user');
 
-        $m = $this->getMigration();
-        $m->table('user')->id()
+        $migrator = $this->getMigrator();
+
+        $migrator->table('user')->id()
             ->field('foo')
             ->field('str', ['type' => 'string'])
             ->field('bool', ['type' => 'boolean'])
@@ -35,6 +35,7 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
             ->field('arr', ['type' => 'array'])
             ->field('obj', ['type' => 'object'])
             ->create();
+
         $this->db->dsql()->table('user')
             ->set([
                 'id'       => 1,
@@ -52,13 +53,13 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
                 'obj'      => 'very long text value'.str_repeat('-=#', 1000), // 3000+ chars
             ])->insert();
 
-        $m2 = $this->getMigration();
-        $m2->importTable('user');
+        $migrator2 = $this->getMigrator();
+        $migrator2->importTable('user');
 
-        $m2->mode('create');
+        $migrator2->mode('create');
 
-        $q1 = preg_replace('/\([0-9,]*\)/i', '', $m->getDebugQuery()); // remove parenthesis otherwise we can't differ money from float etc.
-        $q2 = preg_replace('/\([0-9,]*\)/i', '', $m2->getDebugQuery());
+        $q1 = preg_replace('/\([0-9,]*\)/i', '', $migrator->getDebugQuery()); // remove parenthesis otherwise we can't differ money from float etc.
+        $q2 = preg_replace('/\([0-9,]*\)/i', '', $migrator2->getDebugQuery());
         $this->assertEquals($q1, $q2);
     }
 
@@ -71,8 +72,8 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
         }
 
         $this->dropTable('user');
-        $m = $this->getMigration($this->db);
-        $m->table('user')->id()
+        $migrator = $this->getMigrator($this->db);
+        $migrator->table('user')->id()
             ->field('foo')
             ->field('bar', ['type' => 'integer'])
             ->field('baz', ['type' => 'text'])
@@ -85,21 +86,21 @@ class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
                 'baz' => 'long text value',
             ])->insert();
 
-        $m2 = $this->getMigration($this->db);
+        $m2 = $this->getMigrator($this->db);
         $m2->table('user')->id()
             ->field('xx')
             ->field('bar', ['type' => 'integer'])
             ->field('baz')
-            ->migrate();
+            ->run();
     }
 
     public function testCreateModel()
     {
         $this->dropTable('user');
-        (\atk4\schema\Migration::getMigration(new TestUser($this->db)))->migrate();
 
-        $m = $this->getMigration($this->db);
-        $user_model = $m->createModel($this->db, 'user');
+        \atk4\schema\Migration::of(new TestUser($this->db))->run();
+
+        $user_model = $this->getMigrator($this->db)->createModel($this->db, 'user');
 
         $this->assertEquals(
             [
