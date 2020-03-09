@@ -17,7 +17,7 @@ class Migration extends Expression
     public const REF_TYPE_LINK = 1;
     public const REF_TYPE_PRIMARY = 2;
 
-    /** @var string Expression mode. See $templates. */
+    /** @var string Expression mode. See. */
     public $mode = 'create';
 
     /** @var array Expression templates */
