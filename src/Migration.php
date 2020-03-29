@@ -10,7 +10,7 @@ use atk4\dsql\Expression;
 
 class Migration extends Expression
 {
-    /** @var string Expression mode. See $templates. */
+    /** @var string Expression mode. See. */
     public $mode = 'create';
 
     /** @var array Expression templates */
