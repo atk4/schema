@@ -186,4 +186,14 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
 
         return $ret;
     }
+
+    /**
+     * Return escape character of current DB connection.
+     *
+     * @return string
+     */
+    public function getEscapeChar()
+    {
+        return $this->getProtected($this->db->dsql(), 'escape_char');
+    }
 }
