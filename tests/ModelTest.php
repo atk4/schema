@@ -119,7 +119,7 @@ class TestUser extends \atk4\data\Model
 {
     public $table = 'user';
 
-    public function init()
+    public function init(): void
     {
         parent::init();
 
@@ -136,7 +136,7 @@ class TestRole extends \atk4\data\Model
 {
     public $table = 'role';
 
-    public function init()
+    public function init(): void
     {
         parent::init();
 
