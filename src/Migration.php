@@ -79,11 +79,11 @@ class Migration extends Expression
     public $mapToAgile = [];
 
     /**
-     * Stores migrator class to use based on driver.
+     * Stores migrator class to use based on driverType.
      *
      * Visibility is intentionally set to private.
-     * If generic class Migration::of($source) is called, the migrator class will be resolved based on driver of $source.
-     * When specific migrator class e.g Migration\MySQL::of($source) is called, driver will not be resolved (the $registry property is NOT visible).
+     * If generic class Migration::of($source) is called, the migrator class will be resolved based on driverType of $source.
+     * When specific migrator class e.g Migration\MySQL::of($source) is called, driverType will not be resolved (the $registry property is NOT visible).
      * MySQL migrator class will be used explicitly.
      *
      * @var array
@@ -118,15 +118,15 @@ class Migration extends Expression
     {
         $connection = static::getConnection($source);
 
-        $migrator = self::$registry[$connection->driver] ?? static::class;
+        $migrator = self::$registry[$connection->driverType] ?? static::class;
 
         // if used within a subclass Migration method will create migrator of that class
         // if $migrator class is the generic class Migration then migrator was not resolved correctly
         if ($migrator == __CLASS__) {
             throw new Exception([
                 'Not sure which migration class to use for your DSN',
-                'driver' => $connection->driver,
-                'source' => $source,
+                'driverType' => $connection->driverType,
+                'source'     => $source,
             ]);
         }
 
@@ -143,35 +143,37 @@ class Migration extends Expression
      *
      * CustomMigration\MySQL must be descendant of Migration class.
      *
-     * @param string $driver
+     * @param string $driverType
      * @param string $migrator
      */
-    public static function register($driver, $migrator = null)
+    public static function register(string $driverType, string $migrator = null)
     {
         // forward to generic Migration::register if called with a descendant class e.g Migration\MySQL::register
         if (static::class !== __CLASS__) {
-            return call_user_func([__CLASS__, 'register'], $driver, $migrator ?: static::class);
+            return call_user_func([__CLASS__, 'register'], $driverType, $migrator ?: static::class);
         } elseif (!$migrator) {
-            throw new Exception(['Cannot register generic Migration class', 'driver' => $driver]);
+            throw new Exception(['Cannot register generic Migration class', 'driverType' => $driverType]);
         }
 
         if (!is_subclass_of($migrator, self::class)) {
             throw new Exception(['Migrator must be descendant to generic Migration class', 'migrator' => $migrator]);
         }
 
-        if (is_array($drivers = $driver)) {
+        if (is_array($drivers = $driverType)) {
             foreach ($drivers as $driver => $migrator) {
                 // self must be used instead of static as $registry property is private
                 // it is available only to generic Migrator class
                 self::register($driver, $migrator);
             }
+
+            return;
         }
 
-        self::$registry[$driver] = $migrator;
+        self::$registry[$driverType] = $migrator;
     }
 
     /**
-     * Static method to extract DB driver from Connection, Persistence or Model.
+     * Static method to extract Connection from Connection, Persistence or Model.
      *
      * @param Connection|Persistence|Model $source
      *

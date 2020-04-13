@@ -47,7 +47,7 @@ class BasicTest extends PHPUnit_SchemaTestCase
      */
     public function testCreateAndDrop()
     {
-        if ($this->driver == 'sqlite') {
+        if ($this->driverType == 'sqlite') {
             $this->markTestSkipped('SQLite does not support drop');
         }
 
@@ -94,19 +94,19 @@ class BasicTest extends PHPUnit_SchemaTestCase
         // get original migrator registration
         $origMigratorClass = get_class($this->getMigrator());
 
-        Migration::register($this->driver, CustomMySQLMigrator::class);
+        Migration::register($this->driverType, CustomMySQLMigrator::class);
 
         $this->assertEquals(CustomMySQLMigrator::class, get_class($this->getMigrator()));
 
-        CustomMySQLMigrator::register($this->driver);
+        CustomMySQLMigrator::register($this->driverType);
 
         $this->assertEquals(CustomMySQLMigrator::class, get_class($this->getMigrator()));
 
         // restore original migrator registration
-        Migration::register($this->driver, $origMigratorClass);
+        Migration::register($this->driverType, $origMigratorClass);
 
         $this->expectException(Exception::class);
 
-        Migration::register($this->driver, CustomMigrator::class);
+        Migration::register($this->driverType, CustomMigrator::class);
     }
 }

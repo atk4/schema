@@ -21,8 +21,8 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
     /** @var string DSN string */
     protected $dsn;
 
-    /** @var string What DB driver we use - mysql, sqlite, pgsql etc */
-    public $driver = 'sqlite';
+    /** @var string What DB driverType we use - mysql, sqlite, pgsql etc */
+    public $driverType = 'sqlite';
 
     /**
      * Setup test database.
@@ -37,7 +37,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         $pass = $GLOBALS['DB_PASSWD'] ?? null;
 
         $this->db = Persistence::connect($this->dsn, $user, $pass);
-        $this->driver = $this->db->connection->driver;
+        $this->driverType = $this->db->connection->driverType;
     }
 
     public function tearDown()
