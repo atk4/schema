@@ -2,12 +2,13 @@
 
 namespace atk4\schema;
 
+use atk4\core\AtkPhpunit;
 use atk4\data\Model;
 use atk4\data\Persistence;
 use atk4\dsql\Connection;
 
 // NOTE: This class should stay here in this namespace because other repos rely on it. For example, atk4\data tests
-class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
+class PhpunitTestCase extends AtkPhpunit\TestCase
 {
     /** @var \atk4\data\Persistence Persistence instance */
     public $db;
@@ -27,7 +28,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
     /**
      * Setup test database.
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -40,7 +41,7 @@ class PHPUnit_SchemaTestCase extends \atk4\core\PHPUnit_AgileTestCase
         $this->driverType = $this->db->connection->driverType;
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->db);
 

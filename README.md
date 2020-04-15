@@ -101,7 +101,7 @@ $s->setDB($tables);
 
 You can now automate your database testing by setting and checking your
 database contents easier. First, extend your test-script from
-`\atk4\schema\PHPUnit_SchemaTestCase`. 
+`\atk4\schema\PhpunitTestCase`. 
 
 Next, you need to set your schema
 

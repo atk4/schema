@@ -2,7 +2,9 @@
 
 namespace atk4\schema\tests;
 
-class ModelTest extends \atk4\schema\PHPUnit_SchemaTestCase
+use atk4\schema\PhpunitTestCase;
+
+class ModelTest extends PhpunitTestCase
 {
     public function testSetModelCreate()
     {

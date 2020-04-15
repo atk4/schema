@@ -2,9 +2,9 @@
 
 namespace atk4\schema\tests;
 
-use atk4\schema\PHPUnit_SchemaTestCase;
+use atk4\schema\PhpunitTestCase;
 
-class SchemaTestcaseTest extends PHPUnit_SchemaTestCase
+class PhpunitTestCaseTest extends PhpunitTestCase
 {
     public function testInit()
     {
