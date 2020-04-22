@@ -6,6 +6,9 @@ use atk4\schema\PhpunitTestCase;
 
 class ModelTest extends PhpunitTestCase
 {
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testSetModelCreate()
     {
         $this->dropTable('user');
@@ -65,12 +68,14 @@ class ModelTest extends PhpunitTestCase
         $this->assertEquals($q1, $q2);
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testMigrateTable()
     {
         if ($this->driverType == 'sqlite') {
-            // SQLite doesn't support DROP COLUMN in ALTER TABLE
             // http://www.sqlitetutorial.net/sqlite-alter-table/
-            $this->markTestIncomplete('This test is not supported on '.$this->driverType);
+            $this->markTestSkipped('SQLite does not support DROP COLUMN in ALTER TABLE');
         }
 
         $this->dropTable('user');

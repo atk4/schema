@@ -18,6 +18,8 @@ class BasicTest extends PhpunitTestCase
 {
     /**
      * Test constructor.
+     *
+     * @doesNotPerformAssertions
      */
     public function testCreateAndAlter()
     {
@@ -44,11 +46,13 @@ class BasicTest extends PhpunitTestCase
 
     /**
      * Tests creating and dropping of tables.
+     *
+     * @doesNotPerformAssertions
      */
     public function testCreateAndDrop()
     {
         if ($this->driverType == 'sqlite') {
-            $this->markTestSkipped('SQLite does not support drop');
+            $this->markTestSkipped('SQLite does not support DROP');
         }
 
         $this->dropTable('user');

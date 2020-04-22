@@ -33,16 +33,12 @@
   "require-dev": {
     "atk4/ui": "dev-develop",
     "phpunit/phpunit": "*",
-    "phpunit/phpcov": "*",
-    "codeclimate/php-test-reporter": "*",
-    "squizlabs/php_codesniffer": "^3.5"
+    "phpunit/phpcov": "*"
   },
   "require-dev-release": {
     "atk4/ui": "^2.0",
     "phpunit/phpunit": "*",
-    "phpunit/phpcov": "*",
-    "codeclimate/php-test-reporter": "*",
-    "squizlabs/php_codesniffer": "^3.5"
+    "phpunit/phpcov": "*"
   },
   "suggest": {
     "atk4/ui": "dev-develop",
