@@ -13,15 +13,31 @@
   ],
   "homepage": "http://github.com/atk4/schema",
   "license": "MIT",
+  "authors": [
+    {
+      "name": "Romans Malinovskis",
+      "email": "romans@agiletoolkit.org",
+      "homepage": "https://nearly.guru/"
+    },
+    {
+      "name": "Imants Horsts",
+      "homepage": "https://darkside.lv/"
+    },
+    {
+      "name": "Francesco Danti",
+      "homepage": "https://oracoltech.com/"
+    },
+    {
+      "name": "Michael Voříšek",
+      "homepage": "https://mvorisek.cz/"
+    },
+    {
+      "name": "Georgi Hristov",
+      "homepage": "https://xsystems.io/"
+    }
+  ],
   "minimum-stability": "dev",
   "prefer-stable": true,
-  "authors": [
-    {"name": "Romans Malinovskis", "email": "romans@agiletoolkit.org", "homepage": "https://nearly.guru/" },
-    {"name": "Imants Horsts", "homepage": "https://darkside.lv/"},
-    {"name": "Francesco Danti", "homepage": "https://oracoltech.com/"},
-    {"name": "Michael Voříšek", "homepage": "https://mvorisek.cz/"},
-    {"name": "Georgi Hristov", "homepage": "https://xsystems.io/"}
-  ],
   "config": {
     "sort-packages": true
   },
