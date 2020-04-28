@@ -43,19 +43,19 @@ class ModelTest extends PhpunitTestCase
 
         $this->db->dsql()->table('user')
             ->set([
-                'id'       => 1,
-                'foo'      => 'quite short value, max 255 characters',
-                'str'      => 'quite short value, max 255 characters',
-                'bool'     => true,
-                'int'      => 123,
-                'mon'      => 123.45,
-                'flt'      => 123.456789,
-                'date'     => (new \DateTime())->format('Y-m-d'),
+                'id' => 1,
+                'foo' => 'quite short value, max 255 characters',
+                'str' => 'quite short value, max 255 characters',
+                'bool' => true,
+                'int' => 123,
+                'mon' => 123.45,
+                'flt' => 123.456789,
+                'date' => (new \DateTime())->format('Y-m-d'),
                 'datetime' => (new \DateTime())->format('Y-m-d H:i:s'),
-                'time'     => (new \DateTime())->format('H:i:s'),
-                'txt'      => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
-                'arr'      => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
-                'obj'      => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
+                'time' => (new \DateTime())->format('H:i:s'),
+                'txt' => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
+                'arr' => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
+                'obj' => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
             ])->insert();
 
         $migrator2 = $this->getMigrator();
@@ -65,7 +65,7 @@ class ModelTest extends PhpunitTestCase
 
         $q1 = preg_replace('/\([0-9,]*\)/i', '', $migrator->getDebugQuery()); // remove parenthesis otherwise we can't differ money from float etc.
         $q2 = preg_replace('/\([0-9,]*\)/i', '', $migrator2->getDebugQuery());
-        $this->assertEquals($q1, $q2);
+        $this->assertSame($q1, $q2);
     }
 
     /**
@@ -73,7 +73,7 @@ class ModelTest extends PhpunitTestCase
      */
     public function testMigrateTable()
     {
-        if ($this->driverType == 'sqlite') {
+        if ($this->driverType === 'sqlite') {
             // http://www.sqlitetutorial.net/sqlite-alter-table/
             $this->markTestSkipped('SQLite does not support DROP COLUMN in ALTER TABLE');
         }
@@ -87,7 +87,7 @@ class ModelTest extends PhpunitTestCase
             ->create();
         $this->db->dsql()->table('user')
             ->set([
-                'id'  => 1,
+                'id' => 1,
                 'foo' => 'foovalue',
                 'bar' => 123,
                 'baz' => 'long text value',
@@ -109,7 +109,7 @@ class ModelTest extends PhpunitTestCase
 
         $user_model = $this->getMigrator($this->db)->createModel($this->db, 'user');
 
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'name',
                 'password',

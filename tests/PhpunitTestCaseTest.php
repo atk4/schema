@@ -20,8 +20,8 @@ class PhpunitTestCaseTest extends PhpunitTestCase
         $this->setDB($q2);
         $q3 = $this->getDB('user');
 
-        $this->assertEquals($q2, $q3);
+        $this->assertSame($q2, $q3);
 
-        $this->assertEquals($q, $this->getDB('user', true));
+        $this->assertSame($q, $this->getDB('user', true));
     }
 }

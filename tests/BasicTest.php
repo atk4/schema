@@ -51,7 +51,7 @@ class BasicTest extends PhpunitTestCase
      */
     public function testCreateAndDrop()
     {
-        if ($this->driverType == 'sqlite') {
+        if ($this->driverType === 'sqlite') {
             $this->markTestSkipped('SQLite does not support DROP');
         }
 
@@ -87,7 +87,7 @@ class BasicTest extends PhpunitTestCase
 
         $directMigrator = $migratorClass::of($this->db);
 
-        $this->assertEquals($migratorClass, get_class($directMigrator));
+        $this->assertSame($migratorClass, get_class($directMigrator));
     }
 
     /**
@@ -100,11 +100,11 @@ class BasicTest extends PhpunitTestCase
 
         Migration::register($this->driverType, CustomMySQLMigrator::class);
 
-        $this->assertEquals(CustomMySQLMigrator::class, get_class($this->getMigrator()));
+        $this->assertSame(CustomMySQLMigrator::class, get_class($this->getMigrator()));
 
         CustomMySQLMigrator::register($this->driverType);
 
-        $this->assertEquals(CustomMySQLMigrator::class, get_class($this->getMigrator()));
+        $this->assertSame(CustomMySQLMigrator::class, get_class($this->getMigrator()));
 
         // restore original migrator registration
         Migration::register($this->driverType, $origMigratorClass);

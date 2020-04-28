@@ -23,8 +23,8 @@ class Migration extends Expression
     /** @var array Expression templates */
     protected $templates = [
         'create' => 'create table {table} ([field])',
-        'drop'   => 'drop table if exists {table}',
-        'alter'  => 'alter table {table} [statements]',
+        'drop' => 'drop table if exists {table}',
+        'alter' => 'alter table {table} [statements]',
         'rename' => 'rename table {old_table} to {table}',
     ];
 
@@ -45,16 +45,16 @@ class Migration extends Expression
     /** @var array Conversion mapping from Agile Data types to persistence types */
     protected $defaultMapToPersistence = [
         ['varchar', 255], // default
-        'boolean'   => ['tinyint', 1],
-        'integer'   => ['bigint'],
-        'money'     => ['decimal', 12, 2],
-        'float'     => ['decimal', 16, 6],
-        'date'      => ['date'],
-        'datetime'  => ['datetime'],
-        'time'      => ['varchar', 8],
-        'text'      => ['text'],
-        'array'     => ['text'],
-        'object'    => ['text'],
+        'boolean' => ['tinyint', 1],
+        'integer' => ['bigint'],
+        'money' => ['decimal', 12, 2],
+        'float' => ['decimal', 16, 6],
+        'date' => ['date'],
+        'datetime' => ['datetime'],
+        'time' => ['varchar', 8],
+        'text' => ['text'],
+        'array' => ['text'],
+        'object' => ['text'],
     ];
 
     /** @var array use this array in extended classes to overwrite or extend values of default mapping */
@@ -63,16 +63,16 @@ class Migration extends Expression
     /** @var array Conversion mapping from persistence types to Agile Data types */
     protected $defaultMapToAgile = [
         [null], // default
-        'tinyint'   => ['boolean'],
-        'int'       => ['integer'],
-        'integer'   => ['integer'],
-        'bigint'    => ['integer'],
-        'decimal'   => ['float'],
-        'numeric'   => ['float'],
-        'date'      => ['date'],
-        'datetime'  => ['datetime'],
+        'tinyint' => ['boolean'],
+        'int' => ['integer'],
+        'integer' => ['integer'],
+        'bigint' => ['integer'],
+        'decimal' => ['float'],
+        'numeric' => ['float'],
+        'date' => ['date'],
+        'datetime' => ['datetime'],
         'timestamp' => ['datetime'],
-        'text'      => ['text'],
+        'text' => ['text'],
     ];
 
     /** @var array use this array in extended classes to overwrite or extend values of default mapping */
@@ -91,9 +91,9 @@ class Migration extends Expression
      * */
     private static $registry = [
         'sqlite' => Migration\SQLite::class,
-        'mysql'  => Migration\MySQL::class,
-        'pgsql'  => Migration\PgSQL::class,
-        'oci'    => Migration\Oracle::class,
+        'mysql' => Migration\MySQL::class,
+        'pgsql' => Migration\PgSQL::class,
+        'oci' => Migration\Oracle::class,
     ];
 
     /**
@@ -122,11 +122,11 @@ class Migration extends Expression
 
         // if used within a subclass Migration method will create migrator of that class
         // if $migrator class is the generic class Migration then migrator was not resolved correctly
-        if ($migrator == __CLASS__) {
+        if ($migrator === __CLASS__) {
             throw new Exception([
                 'Not sure which migration class to use for your DSN',
                 'driverType' => $connection->driverType,
-                'source'     => $source,
+                'source' => $source,
             ]);
         }
 
@@ -143,7 +143,6 @@ class Migration extends Expression
      *
      * CustomMigration\MySQL must be descendant of Migration class.
      *
-     * @param string $driverType
      * @param string $migrator
      */
     public static function register(string $driverType, string $migrator = null)
@@ -178,8 +177,6 @@ class Migration extends Expression
      * @param Connection|Persistence|Model $source
      *
      * @throws Exception
-     *
-     * @return Connection
      */
     public static function getConnection($source): Connection
     {
@@ -240,12 +237,8 @@ class Migration extends Expression
     /**
      * Sets model.
      *
-     * @param Model $m
-     *
      * @throws Exception
      * @throws \ReflectionException
-     *
-     * @return Model
      */
     public function setModel(Model $m): Model
     {
@@ -261,7 +254,7 @@ class Migration extends Expression
                 continue;
             }
 
-            if ($field->short_name == $m->id_field) {
+            if ($field->short_name === $m->id_field) {
                 $ref_type = self::REF_TYPE_PRIMARY;
                 $persist_field = $field;
             } else {
@@ -271,8 +264,8 @@ class Migration extends Expression
             }
 
             $options = [
-                'type'      => $ref_type !== self::REF_TYPE_NONE && empty($persist_field->type) ? 'integer' : $persist_field->type,
-                'ref_type'  => $ref_type,
+                'type' => $ref_type !== self::REF_TYPE_NONE && empty($persist_field->type) ? 'integer' : $persist_field->type,
+                'ref_type' => $ref_type,
                 'mandatory' => ($field->mandatory || $field->required) && ($persist_field->mandatory || $persist_field->required),
                 // todo add more options here
             ];
@@ -314,9 +307,9 @@ class Migration extends Expression
             $dummyPersistence = new Persistence\SQL($this->connection);
 
             return (new $reference_model_class($dummyPersistence))->getField($reference_field);
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     /**
@@ -437,7 +430,7 @@ class Migration extends Expression
         // add new fields or update existing ones
         foreach ($new as $field => $options) {
             // never update ID field (sadly hard-coded field name)
-            if ($field == 'id') {
+            if ($field === 'id') {
                 continue;
             }
 
@@ -449,8 +442,8 @@ class Migration extends Expression
                     $newSQLFieldType = $this->getSQLFieldType($options['type']);
                     if ($oldSQLFieldType !== $newSQLFieldType) {
                         $this->alterField($field, $options);
-                        $altered++;
-                        $changes++;
+                        ++$altered;
+                        ++$changes;
                     }
                 }
 
@@ -458,29 +451,29 @@ class Migration extends Expression
             } else {
                 // new field, so let's just add it
                 $this->newField($field, $options);
-                $added++;
-                $changes++;
+                ++$added;
+                ++$changes;
             }
         }
 
         // remaining old fields - drop them
         foreach ($old as $field => $options) {
             // never delete ID field (sadly hard-coded field name)
-            if ($field == 'id') {
+            if ($field === 'id') {
                 continue;
             }
 
             $this->dropField($field);
-            $dropped++;
-            $changes++;
+            ++$dropped;
+            ++$changes;
         }
 
         if ($changes) {
             $this->alter();
 
-            return 'added ' . $added . ' field' . ($added == 1 ? '' : 's') . ', ' .
-                'changed ' . $altered . ' field' . ($altered == 1 ? '' : 's') . ' and ' .
-                'deleted ' . $dropped . ' field' . ($dropped == 1 ? '' : 's');
+            return 'added ' . $added . ' field' . ($added === 1 ? '' : 's') . ', ' .
+                'changed ' . $altered . ' field' . ($altered === 1 ? '' : 's') . ' and ' .
+                'deleted ' . $dropped . ' field' . ($dropped === 1 ? '' : 's');
         }
 
         return 'no changes';
@@ -488,8 +481,6 @@ class Migration extends Expression
 
     /**
      * Renders statement.
-     *
-     * @return string
      */
     public function _render_statements(): string
     {
@@ -525,8 +516,6 @@ class Migration extends Expression
      *
      * @throws Exception
      * @throws \atk4\data\Exception
-     *
-     * @return Model
      */
     public function createModel($persistence, $table = null): Model
     {
@@ -537,7 +526,7 @@ class Migration extends Expression
         $this->importTable($this['table']);
 
         foreach ($this->_getFields() as $field => $options) {
-            if ($field == 'id') {
+            if ($field === 'id') {
                 continue;
             }
 
@@ -576,8 +565,7 @@ class Migration extends Expression
     /**
      * Sets alterField argument.
      *
-     * @param string $field
-     * @param array  $options
+     * @param array $options
      *
      * @throws Exception
      *
@@ -611,10 +599,6 @@ class Migration extends Expression
      * DB engine specific.
      *
      * @todo Maybe convert to abstract function
-     *
-     * @param string $table
-     *
-     * @return array
      */
     public function describeTable(string $table): array
     {
@@ -625,8 +609,6 @@ class Migration extends Expression
      * Convert SQL field types to Agile Data field types.
      *
      * @param string $type SQL field type
-     *
-     * @return string|null
      */
     public function getModelFieldType(string $type): ?string
     {
@@ -644,8 +626,6 @@ class Migration extends Expression
      *
      * @param string $type    Agile Data field type
      * @param array  $options More options
-     *
-     * @return string|null
      */
     public function getSQLFieldType(?string $type, array $options = []): ?string
     {
@@ -680,11 +660,7 @@ class Migration extends Expression
     /**
      * Import fields from database into migration field config.
      *
-     * @param string $table
-     *
      * @throws Exception
-     *
-     * @return bool
      */
     public function importTable(string $table): bool
     {
@@ -697,7 +673,7 @@ class Migration extends Expression
             $ref_type = $row['pk'] ? self::REF_TYPE_PRIMARY : self::REF_TYPE_NONE;
 
             $options = [
-                'type'     => $type,
+                'type' => $type,
                 'ref_type' => $ref_type,
             ];
 
@@ -763,7 +739,7 @@ class Migration extends Expression
     public function id($name = null)
     {
         $options = [
-            'type'     => 'integer',
+            'type' => 'integer',
             'ref_type' => self::REF_TYPE_PRIMARY,
         ];
 
@@ -793,6 +769,7 @@ class Migration extends Expression
         foreach ($this->args['field'] as $field => $options) {
             if ($options instanceof Expression) {
                 $ret[] = $this->_escape($field) . ' ' . $this->_consume($options);
+
                 continue;
             }
 
@@ -804,11 +781,6 @@ class Migration extends Expression
 
     /**
      * Renders one field.
-     *
-     * @param string $field
-     * @param array  $options
-     *
-     * @return string
      */
     protected function _render_one_field(string $field, array $options): string
     {
@@ -820,8 +792,6 @@ class Migration extends Expression
 
     /**
      * Return fields.
-     *
-     * @return array
      */
     public function _getFields(): array
     {

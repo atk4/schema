@@ -14,10 +14,6 @@ class SQLite extends \atk4\schema\Migration
     /**
      * Return database table descriptions.
      * DB engine specific.
-     *
-     * @param string $table
-     *
-     * @return array
      */
     public function describeTable(string $table): array
     {
@@ -29,8 +25,6 @@ class SQLite extends \atk4\schema\Migration
      *
      * @param string $type    Agile Data field type
      * @param array  $options More options
-     *
-     * @return string|null
      */
     public function getSQLFieldType(?string $type, array $options = []): ?string
     {

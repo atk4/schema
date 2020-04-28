@@ -9,7 +9,7 @@ namespace atk4\schema;
 class MigratorConsole extends \atk4\ui\Console
 {
     /** @var string Name of migrator class to use */
-    public $migrator_class = null;
+    public $migrator_class;
 
     /**
      * Provided with array of models, perform migration for each of them.

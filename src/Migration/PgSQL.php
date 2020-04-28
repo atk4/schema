@@ -10,28 +10,24 @@ class PgSQL extends \atk4\schema\Migration
 
     /** @var array use this array in extended classes to overwrite or extend values of default mapping */
     public $mapToPersistence = [
-        'boolean'   => ['boolean'],
-        'date'      => ['date'],
-        'datetime'  => ['timestamp'], // without timezone
-        'time'      => ['time'], // without timezone
+        'boolean' => ['boolean'],
+        'date' => ['date'],
+        'datetime' => ['timestamp'], // without timezone
+        'time' => ['time'], // without timezone
     ];
 
     /** @var array use this array in extended classes to overwrite or extend values of default mapping */
     public $mapToAgile = [
-        'boolean'   => ['boolean'],
-        'date'      => ['date'],
-        'datetime'  => ['datetime'],
+        'boolean' => ['boolean'],
+        'date' => ['date'],
+        'datetime' => ['datetime'],
         'timestamp' => ['datetime'],
-        'time'      => ['time'],
+        'time' => ['time'],
     ];
 
     /**
      * Return database table descriptions.
      * DB engine specific.
-     *
-     * @param string $table
-     *
-     * @return array
      */
     public function describeTable(string $table): array
     {
@@ -46,7 +42,7 @@ class PgSQL extends \atk4\schema\Migration
         foreach ($columns as $row) {
             $row2 = [];
             $row2['name'] = $row['column_name'];
-            $row2['pk'] = $row['is_identity'] == 'YES';
+            $row2['pk'] = $row['is_identity'] === 'YES';
             $row2['type'] = preg_replace('/\(.*/', '', $row['udt_name']); // $row['data_type'], but it's PgSQL specific type
 
             $result[] = $row2;
@@ -57,8 +53,6 @@ class PgSQL extends \atk4\schema\Migration
 
     /**
      * Renders statement.
-     *
-     * @return string
      */
     public function _render_statements(): string
     {

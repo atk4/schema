@@ -21,7 +21,7 @@ try {
     // ok, now we surely have DB!
 
     $user->save([
-        'name' => 'John' . rand(1, 100),
+        'name' => 'John' . random_int(1, 100),
     ]);
 } catch (\atk4\core\Exception $e) {
     echo $e->getColorfulText();

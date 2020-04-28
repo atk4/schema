@@ -17,25 +17,21 @@ class MySQL extends \atk4\schema\Migration
 
     /** @var array use this array in extended classes to overwrite or extend values of default mapping */
     public $mapToPersistence = [
-        'text'      => ['longtext'],
-        'array'     => ['longtext'],
-        'object'    => ['longtext'],
+        'text' => ['longtext'],
+        'array' => ['longtext'],
+        'object' => ['longtext'],
     ];
 
     /** @var array use this array in extended classes to overwrite or extend values of default mapping */
     public $mapToAgile = [
-        0           => ['string'],
-        'longtext'  => ['text'],
-        'longblob'  => ['text'],
+        0 => ['string'],
+        'longtext' => ['text'],
+        'longblob' => ['text'],
     ];
 
     /**
      * Return database table descriptions.
      * DB engine specific.
-     *
-     * @param string $table
-     *
-     * @return array
      */
     public function describeTable(string $table): array
     {
@@ -48,7 +44,7 @@ class MySQL extends \atk4\schema\Migration
         foreach ($this->connection->expr('describe {}', [$table]) as $row) {
             $row2 = [];
             $row2['name'] = $row['Field'];
-            $row2['pk'] = $row['Key'] == 'PRI';
+            $row2['pk'] = $row['Key'] === 'PRI';
             $row2['type'] = preg_replace('/\(.*/', '', $row['Type']);
 
             $result[] = $row2;
