@@ -4,9 +4,10 @@ namespace atk4\schema\Migration;
 
 class SQLite extends \atk4\schema\Migration
 {
-    /** @var string Expression to create primary key */
+    /** @var string expression to create primary key */
     public $primary_key_expr = 'primary key autoincrement';
 
+    /** @var array use this array in extended classes to overwrite or extend values of default mapping */
     public $mapToAgile = [
         0 => ['string'],
     ];
