@@ -34,7 +34,7 @@ class MigratorConsole extends \atk4\ui\Console
 
                 $result = $migrator::of($model)->run();
 
-                $console->debug('  '.get_class($model).'.. '.$result);
+                $console->debug('  ' . get_class($model) . '.. ' . $result);
             }
 
             $console->notice('Done with migration');

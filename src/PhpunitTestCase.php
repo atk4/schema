@@ -33,7 +33,7 @@ class PhpunitTestCase extends AtkPhpunit\TestCase
         parent::setUp();
 
         // establish connection
-        $this->dsn = ($this->debug ? ('dumper:') : '').($GLOBALS['DB_DSN'] ?? 'sqlite::memory:');
+        $this->dsn = ($this->debug ? ('dumper:') : '') . ($GLOBALS['DB_DSN'] ?? 'sqlite::memory:');
         $user = $GLOBALS['DB_USER'] ?? null;
         $pass = $GLOBALS['DB_PASSWD'] ?? null;
 

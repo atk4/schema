@@ -53,9 +53,9 @@ class ModelTest extends PhpunitTestCase
                 'date'     => (new \DateTime())->format('Y-m-d'),
                 'datetime' => (new \DateTime())->format('Y-m-d H:i:s'),
                 'time'     => (new \DateTime())->format('H:i:s'),
-                'txt'      => 'very long text value'.str_repeat('-=#', 1000), // 3000+ chars
-                'arr'      => 'very long text value'.str_repeat('-=#', 1000), // 3000+ chars
-                'obj'      => 'very long text value'.str_repeat('-=#', 1000), // 3000+ chars
+                'txt'      => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
+                'arr'      => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
+                'obj'      => 'very long text value' . str_repeat('-=#', 1000), // 3000+ chars
             ])->insert();
 
         $migrator2 = $this->getMigrator();
