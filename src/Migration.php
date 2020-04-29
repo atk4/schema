@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace atk4\schema;
 
 use atk4\core\Exception;
@@ -624,12 +626,14 @@ class Migration extends Expression
     /**
      * Convert Agile Data field types to SQL field types.
      *
-     * @param string $type    Agile Data field type
-     * @param array  $options More options
+     * @param string|null $type    Agile Data field type
+     * @param array       $options More options
      */
     public function getSQLFieldType(?string $type, array $options = []): ?string
     {
-        $type = strtolower($type);
+        if ($type !== null) {
+            $type = strtolower($type);
+        }
 
         $map = array_merge($this->defaultMapToPersistence, $this->mapToPersistence);
         $a = array_key_exists($type, $map) ? $map[$type] : $map[0];

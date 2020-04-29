@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace atk4\schema\Migration;
 
 class SQLite extends \atk4\schema\Migration
@@ -24,8 +26,8 @@ class SQLite extends \atk4\schema\Migration
     /**
      * Convert Agile Data field types to SQL field types.
      *
-     * @param string $type    Agile Data field type
-     * @param array  $options More options
+     * @param string|null $type    Agile Data field type
+     * @param array       $options More options
      */
     public function getSQLFieldType(?string $type, array $options = []): ?string
     {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 include 'init.php';
 
 class User extends \atk4\data\Model

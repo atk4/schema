@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace atk4\schema\Migration;
 
 class MySQL extends \atk4\schema\Migration
