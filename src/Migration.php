@@ -615,7 +615,7 @@ class Migration extends Expression
     public function getModelFieldType(string $type): ?string
     {
         // remove parenthesis
-        $type = trim(preg_replace('/\(.*/', '', mb_strtolower($type)));
+        $type = trim(preg_replace('/\(.*/', '', strtolower($type)));
 
         $map = array_replace($this->defaultMapToAgile, $this->mapToAgile);
         $a = array_key_exists($type, $map) ? $map[$type] : $map[0];
@@ -632,7 +632,7 @@ class Migration extends Expression
     public function getSQLFieldType(?string $type, array $options = []): ?string
     {
         if ($type !== null) {
-            $type = mb_strtolower($type);
+            $type = strtolower($type);
         }
 
         $map = array_merge($this->defaultMapToPersistence, $this->mapToPersistence);
