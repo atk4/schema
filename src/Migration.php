@@ -125,11 +125,9 @@ class Migration extends Expression
         // if used within a subclass Migration method will create migrator of that class
         // if $migrator class is the generic class Migration then migrator was not resolved correctly
         if ($migrator === __CLASS__) {
-            throw new Exception([
-                'Not sure which migration class to use for your DSN',
-                'driverType' => $connection->driverType,
-                'source' => $source,
-            ]);
+            throw (new Exception('Not sure which migration class to use for your DSN'))
+                ->addMoreInfo('driverType', $connection->driverType)
+                ->addMoreInfo('source', $source);
         }
 
         return new $migrator($source, $params);
@@ -153,11 +151,13 @@ class Migration extends Expression
         if (static::class !== __CLASS__) {
             return call_user_func([__CLASS__, 'register'], $driverType, $migrator ?: static::class);
         } elseif (!$migrator) {
-            throw new Exception(['Cannot register generic Migration class', 'driverType' => $driverType]);
+            throw (new Exception('Cannot register generic Migration class'))
+                ->addMoreInfo('driverType', $driverType);
         }
 
         if (!is_subclass_of($migrator, self::class)) {
-            throw new Exception(['Migrator must be descendant to generic Migration class', 'migrator' => $migrator]);
+            throw (new Exception('Migrator must be descendant to generic Migration class'))
+                ->addMoreInfo('migrator', $migrator);
         }
 
         if (is_array($drivers = $driverType)) {
@@ -194,10 +194,8 @@ class Migration extends Expression
             return $source->persistence->connection;
         }
 
-        throw new Exception([
-            'Source is specified incorrectly. Must be Connection, Persistence or initialized Model',
-            'source' => $source,
-        ]);
+        throw (new Exception('Source is specified incorrectly. Must be Connection, Persistence or initialized Model'))
+            ->addMoreInfo('source', $source);
     }
 
     /**
@@ -326,7 +324,8 @@ class Migration extends Expression
     public function mode(string $mode): self
     {
         if (!isset($this->templates[$mode])) {
-            throw new Exception(['Structure builder does not have this mode', 'mode' => $mode]);
+            throw (new Exception('Structure builder does not have this mode'))
+                ->addMoreInfo('mode', $mode);
         }
 
         $this->mode = $mode;
@@ -765,9 +764,7 @@ class Migration extends Expression
         $ret = [];
 
         if (!$this->args['field']) {
-            throw new Exception([
-                'No fields defined for table',
-            ]);
+            throw new Exception('No fields defined for table');
         }
 
         foreach ($this->args['field'] as $field => $options) {
@@ -819,10 +816,8 @@ class Migration extends Expression
         } else {
             // don't allow multiple values with same alias
             if (isset($this->args[$what][$alias])) {
-                throw new Exception([
-                    ucfirst($what) . ' alias should be unique',
-                    'alias' => $alias,
-                ]);
+                throw (new Exception(ucfirst($what) . ' alias should be unique'))
+                    ->addMoreInfo('alias', $alias);
             }
 
             $this->args[$what][$alias] = $value;
