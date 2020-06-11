@@ -112,8 +112,6 @@ class Migration extends Expression
      * @param Connection|Persistence|Model $source
      * @param array                        $params
      *
-     * @throws Exception
-     *
      * @return Migration Subclass
      */
     public static function of($source, $params = []): self
@@ -177,8 +175,6 @@ class Migration extends Expression
      * Static method to extract Connection from Connection, Persistence or Model.
      *
      * @param Connection|Persistence|Model $source
-     *
-     * @throws Exception
      */
     public static function getConnection($source): Connection
     {
@@ -203,9 +199,6 @@ class Migration extends Expression
      *
      * @param Connection|Persistence|Model $source
      * @param array                        $params
-     *
-     * @throws Exception
-     * @throws \atk4\dsql\Exception
      */
     public function __construct($source, $params = [])
     {
@@ -218,8 +211,6 @@ class Migration extends Expression
      * Sets source of migration.
      *
      * @param Connection|Persistence|Model $source
-     *
-     * @throws Exception
      */
     public function setSource($source)
     {
@@ -236,9 +227,6 @@ class Migration extends Expression
 
     /**
      * Sets model.
-     *
-     * @throws Exception
-     * @throws \ReflectionException
      */
     public function setModel(Model $m): Model
     {
@@ -317,8 +305,6 @@ class Migration extends Expression
      *
      * @param string $mode Template name
      *
-     * @throws Exception
-     *
      * @return $this
      */
     public function mode(string $mode): self
@@ -337,9 +323,6 @@ class Migration extends Expression
     /**
      * Create new table.
      *
-     * @throws Exception
-     * @throws \atk4\dsql\Exception
-     *
      * @return $this
      */
     public function create(): self
@@ -351,9 +334,6 @@ class Migration extends Expression
 
     /**
      * Drop table.
-     *
-     * @throws Exception
-     * @throws \atk4\dsql\Exception
      *
      * @return $this
      */
@@ -367,9 +347,6 @@ class Migration extends Expression
     /**
      * Alter table.
      *
-     * @throws Exception
-     * @throws \atk4\dsql\Exception
-     *
      * @return $this
      */
     public function alter(): self
@@ -381,9 +358,6 @@ class Migration extends Expression
 
     /**
      * Rename table.
-     *
-     * @throws Exception
-     * @throws \atk4\dsql\Exception
      *
      * @return $this
      */
@@ -406,8 +380,6 @@ class Migration extends Expression
      * Will read current schema and consult current 'field' arguments, to see if they are matched.
      * If table does not exist, will invoke ->create. If table does exist, then it will execute
      * methods ->newField(), ->dropField() or ->alterField() as needed, then call ->alter().
-     *
-     * @throws Exception
      *
      * @return string Returns short textual info for logging purposes
      */
@@ -514,9 +486,6 @@ class Migration extends Expression
      *
      * @param Persistence $persistence
      * @param string      $table
-     *
-     * @throws Exception
-     * @throws \atk4\data\Exception
      */
     public function createModel($persistence, $table = null): Model
     {
@@ -552,8 +521,6 @@ class Migration extends Expression
      * @param string $field
      * @param array  $options
      *
-     * @throws Exception
-     *
      * @return $this
      */
     public function newField($field, $options = []): self
@@ -568,8 +535,6 @@ class Migration extends Expression
      *
      * @param array $options
      *
-     * @throws Exception
-     *
      * @return $this
      */
     public function alterField(string $field, $options = []): self
@@ -583,8 +548,6 @@ class Migration extends Expression
      * Sets dropField argument.
      *
      * @param string $field
-     *
-     * @throws Exception
      *
      * @return $this
      */
@@ -662,8 +625,6 @@ class Migration extends Expression
 
     /**
      * Import fields from database into migration field config.
-     *
-     * @throws Exception
      */
     public function importTable(string $table): bool
     {
@@ -720,8 +681,6 @@ class Migration extends Expression
      * @param string $name
      * @param array  $options
      *
-     * @throws Exception
-     *
      * @return $this
      */
     public function field($name, $options = [])
@@ -753,9 +712,6 @@ class Migration extends Expression
 
     /**
      * Render "field" template.
-     *
-     * @throws Exception
-     * @throws \atk4\dsql\Exception
      *
      * @return string
      */
@@ -805,8 +761,6 @@ class Migration extends Expression
      * @param string $what  Where to set it - table|field
      * @param string $alias Alias name
      * @param mixed  $value Value to set in args array
-     *
-     * @throws Exception
      */
     protected function _set_args(string $what, string $alias, $value)
     {
