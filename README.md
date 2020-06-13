@@ -2,15 +2,10 @@
 
 This extension for Agile Data implements ability to work with SQL schema, execute migrations, perform DB-tests in PHPUnit (used by other ATK frameworks) and sync up "Model" structure to the database.
 
-[![Build Status](https://travis-ci.org/atk4/schema.png?branch=develop)](https://travis-ci.org/atk4/schema)
-[![Code Climate](https://codeclimate.com/github/atk4/schema/badges/gpa.svg)](https://codeclimate.com/github/atk4/schema)
-[![StyleCI](https://styleci.io/repos/69662508/shield)](https://styleci.io/repos/69662508)
+![Build](https://github.com/atk4/schema/workflows/Unit%20Testing/badge.svg)
 [![CodeCov](https://codecov.io/gh/atk4/schema/branch/develop/graph/badge.svg)](https://codecov.io/gh/atk4/schema)
-[![Test Coverage](https://codeclimate.com/github/atk4/schema/badges/coverage.svg)](https://codeclimate.com/github/atk4/schema/coverage)
-[![Issue Count](https://codeclimate.com/github/atk4/schema/badges/issue_count.svg)](https://codeclimate.com/github/atk4/schema)
-
-[![License](https://poser.pugx.org/atk4/schema/license)](https://packagist.org/packages/atk4/schema)
-[![GitHub release](https://img.shields.io/github/release/atk4/schema.svg?maxAge=2592000)](CHANGELOG.md)
+[![GitHub release](https://img.shields.io/github/release/atk4/schema.svg)](CHANGELOG.md)
+[![Code Climate](https://codeclimate.com/github/atk4/schema/badges/gpa.svg)](https://codeclimate.com/github/atk4/schema)
 
 
 ### Basic Usage:
@@ -134,8 +129,3 @@ Add the following inside your `composer.json` file:
 ``` console
 composer require atk4/schema
 ```
-
-## Current Status
-
-Stable functionality
-

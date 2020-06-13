@@ -14,4 +14,4 @@ cache
 *.cache.*
 
 /phpunit.xml
-/phpunit-mysql.xml
+/phpunit-*.xml
