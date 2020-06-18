@@ -105,7 +105,7 @@ class PhpunitTestCase extends AtkPhpunit\TestCase
 
                         continue;
                     } elseif (is_float($row)) {
-                        $migrator->field($field, ['type' => 'numeric(10,5)']);
+                        $migrator->field($field, ['type' => 'float']);
 
                         continue;
                     } elseif ($row instanceof \DateTime) {
