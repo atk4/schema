@@ -62,12 +62,10 @@
     "phpunit/phpunit": "*"
   },
   "suggest": {
-    "atk4/ui": "dev-develop",
-    "jdorn/sql-formatter": "*"
+    "atk4/ui": "dev-develop"
   },
   "suggest-release": {
-    "atk4/ui": "^2.0",
-    "jdorn/sql-formatter": "*"
+    "atk4/ui": "^2.0"
   },
   "autoload": {
     "psr-4": {
