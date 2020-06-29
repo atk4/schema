@@ -28,7 +28,7 @@ class MigratorConsole extends \atk4\ui\Console
 
             foreach ($models as $model) {
                 if (!is_object($model)) {
-                    $model = $this->factory($model);
+                    $model = $this->factory((array) $model);
                     $persistence->add($model);
                 }
 
