@@ -151,11 +151,10 @@ class PhpunitTestCase extends AtkPhpunit\TestCase
      * Return database data.
      *
      * @param array $tables Array of tables
-     * @param bool  $no_id
      *
      * @return array
      */
-    public function getDB($tables = null, $no_id = false)
+    public function getDB($tables = null, bool $no_id = false)
     {
         $tables = $tables ?: $this->tables;
 
