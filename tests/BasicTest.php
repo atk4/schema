@@ -8,7 +8,7 @@ use atk4\core\Exception;
 use atk4\schema\Migration;
 use atk4\schema\PhpunitTestCase;
 
-class CustomMySQLMigrator extends Migration
+class CustomMysqlMigrator extends Migration
 {
 }
 
@@ -100,13 +100,13 @@ class BasicTest extends PhpunitTestCase
         // get original migrator registration
         $origMigratorClass = get_class($this->getMigrator());
 
-        Migration::register($this->driverType, CustomMySQLMigrator::class);
+        Migration::register($this->driverType, CustomMysqlMigrator::class);
 
-        $this->assertSame(CustomMySQLMigrator::class, get_class($this->getMigrator()));
+        $this->assertSame(CustomMysqlMigrator::class, get_class($this->getMigrator()));
 
-        CustomMySQLMigrator::register($this->driverType);
+        CustomMysqlMigrator::register($this->driverType);
 
-        $this->assertSame(CustomMySQLMigrator::class, get_class($this->getMigrator()));
+        $this->assertSame(CustomMysqlMigrator::class, get_class($this->getMigrator()));
 
         // restore original migrator registration
         Migration::register($this->driverType, $origMigratorClass);

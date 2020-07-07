@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace atk4\schema\Migration;
 
-class SQLite extends \atk4\schema\Migration
+class Sqlite extends \atk4\schema\Migration
 {
     /** @var string expression to create primary key */
     public $primary_key_expr = 'primary key autoincrement';
@@ -29,9 +29,9 @@ class SQLite extends \atk4\schema\Migration
      * @param string|null $type    Agile Data field type
      * @param array       $options More options
      */
-    public function getSQLFieldType(?string $type, array $options = []): ?string
+    public function getSqlFieldType(?string $type, array $options = []): ?string
     {
-        $res = parent::getSQLFieldType($type, $options);
+        $res = parent::getSqlFieldType($type, $options);
 
         // fix PK datatype to "integer primary key"
         // see https://www.sqlite.org/lang_createtable.html#rowid

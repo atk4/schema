@@ -49,7 +49,7 @@ $migrator->table('user')
     ->alter();
 ```
 
-Currently atk4/schema fully supports MySQL and SQLite connections, partly PgSQL and Oracle connections.
+Currently atk4/schema fully supports MySQL and SQLite databases and partly PostgreSQL and Oracle.
 Other SQL databases are not yet natively supported but you can register your migrator class at runtime.
 
 ``` php
@@ -85,11 +85,11 @@ table contents:
 ``` php
 <?php
 $s = new \atk4\data\schema\Snapshot($connection);
-$tables = $s->getDB($tables);
+$tables = $s->getDb($tables);
 
 // do anything with tables
 
-$s->setDB($tables);
+$s->setDb($tables);
 ```
 
 ## Integration with PHPUnit
@@ -105,13 +105,13 @@ $q = ['user' => [
     ['name' => 'John', 'surname' => 'Smith'],
     ['name' => 'Steve', 'surname' => 'Jobs'],
 ]];
-$this->setDB($q);
+$this->setDb($q);
 ```
 
 Perform any changes, then execute:
 
 ```
-$this->assertEquals($q, $this->getDB('user'));
+$this->assertEquals($q, $this->getDb('user'));
 ```
 
 To ensure that database remained the same. Of course you can compare

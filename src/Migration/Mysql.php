@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace atk4\schema\Migration;
 
-class MySQL extends \atk4\schema\Migration
+class Mysql extends \atk4\schema\Migration
 {
     /**
      * Field, table and alias name escaping symbol.

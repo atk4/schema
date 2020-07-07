@@ -6,7 +6,7 @@ namespace atk4\schema;
 
 use atk4\core\Exception;
 use atk4\data\Field;
-use atk4\data\Field_SQL_Expression;
+use atk4\data\FieldSqlExpression;
 use atk4\Data\Model;
 use atk4\data\Persistence;
 use atk4\data\Reference\HasOne;
@@ -85,16 +85,16 @@ class Migration extends Expression
      *
      * Visibility is intentionally set to private.
      * If generic class Migration::of($source) is called, the migrator class will be resolved based on driverType of $source.
-     * When specific migrator class e.g Migration\MySQL::of($source) is called, driverType will not be resolved (the $registry property is NOT visible).
-     * MySQL migrator class will be used explicitly.
+     * When specific migrator class e.g Migration\Mysql::of($source) is called, driverType will not be resolved (the $registry property is NOT visible).
+     * Mysql migrator class will be used explicitly.
      *
      * @var array
      *
      * */
     private static $registry = [
-        'sqlite' => Migration\SQLite::class,
-        'mysql' => Migration\MySQL::class,
-        'pgsql' => Migration\PgSQL::class,
+        'sqlite' => Migration\Sqlite::class,
+        'mysql' => Migration\Mysql::class,
+        'pgsql' => Migration\Postgresql::class,
         'oci' => Migration\Oracle::class,
     ];
 
@@ -136,16 +136,16 @@ class Migration extends Expression
      *
      * Can be used as:
      *
-     * Migration::register('mysql', CustomMigration\MySQL), or
-     * CustomMigration\MySQL::register('mysql')
+     * Migration::register('mysql', CustomMigration\Mysql), or
+     * CustomMigration\Mysql::register('mysql')
      *
-     * CustomMigration\MySQL must be descendant of Migration class.
+     * CustomMigration\Mysql must be descendant of Migration class.
      *
      * @param string $migrator
      */
     public static function register(string $driverType, string $migrator = null)
     {
-        // forward to generic Migration::register if called with a descendant class e.g Migration\MySQL::register
+        // forward to generic Migration::register if called with a descendant class e.g Migration\Mysql::register
         if (static::class !== __CLASS__) {
             return call_user_func([__CLASS__, 'register'], $driverType, $migrator ?: static::class);
         } elseif (!$migrator) {
@@ -180,12 +180,12 @@ class Migration extends Expression
     {
         if ($source instanceof Connection) {
             return $source;
-        } elseif ($source instanceof Persistence\SQL) {
+        } elseif ($source instanceof Persistence\Sql) {
             return $source->connection;
         } elseif (
             $source instanceof Model
             && $source->persistence
-            && ($source->persistence instanceof Persistence\SQL)
+            && ($source->persistence instanceof Persistence\Sql)
         ) {
             return $source->persistence->connection;
         }
@@ -219,7 +219,7 @@ class Migration extends Expression
         if (
             $source instanceof Model
             && $source->persistence
-            && ($source->persistence instanceof Persistence\SQL)
+            && ($source->persistence instanceof Persistence\Sql)
         ) {
             $this->setModel($source);
         }
@@ -238,7 +238,7 @@ class Migration extends Expression
                 continue;
             }
 
-            if ($field instanceof Field_SQL_Expression) {
+            if ($field instanceof FieldSqlExpression) {
                 continue;
             }
 
@@ -292,7 +292,7 @@ class Migration extends Expression
             // @TODO fix, but without the dummy persistence, the following is shown:
             // Uncaught atk4\core\Exception: Element is not found in collection
             // for ID column
-            $dummyPersistence = new Persistence\SQL($this->connection);
+            $dummyPersistence = new Persistence\Sql($this->connection);
 
             return (new $reference_model_class($dummyPersistence))->getField($reference_field);
         }
@@ -411,8 +411,8 @@ class Migration extends Expression
                 // compare options and if needed alter field
                 // @todo add more options here like 'len'
                 if (array_key_exists('type', $old[$field]) && array_key_exists('type', $options)) {
-                    $oldSQLFieldType = $this->getSQLFieldType($old[$field]['type']);
-                    $newSQLFieldType = $this->getSQLFieldType($options['type']);
+                    $oldSQLFieldType = $this->getSqlFieldType($old[$field]['type']);
+                    $newSQLFieldType = $this->getSqlFieldType($options['type']);
                     if ($oldSQLFieldType !== $newSQLFieldType) {
                         $this->alterField($field, $options);
                         ++$altered;
@@ -591,7 +591,7 @@ class Migration extends Expression
      * @param string|null $type    Agile Data field type
      * @param array       $options More options
      */
-    public function getSQLFieldType(?string $type, array $options = []): ?string
+    public function getSqlFieldType(?string $type, array $options = []): ?string
     {
         if ($type !== null) {
             $type = strtolower($type);
@@ -742,7 +742,7 @@ class Migration extends Expression
     protected function _render_one_field(string $field, array $options): string
     {
         $name = $options['name'] ?? $field;
-        $type = $this->getSQLFieldType($options['type'] ?? null, $options);
+        $type = $this->getSqlFieldType($options['type'] ?? null, $options);
 
         return $this->_escape($name) . ' ' . $type;
     }

@@ -79,7 +79,7 @@ class PhpunitTestCase extends AtkPhpunit\TestCase
      * @param array $db_data
      * @param bool  $import_data Should we import data of just create table
      */
-    public function setDB($db_data, $import_data = true)
+    public function setDb($db_data, $import_data = true)
     {
         $this->tables = array_keys($db_data);
 
@@ -154,7 +154,7 @@ class PhpunitTestCase extends AtkPhpunit\TestCase
      *
      * @return array
      */
-    public function getDB($tables = null, bool $no_id = false)
+    public function getDb($tables = null, bool $no_id = false)
     {
         $tables = $tables ?: $this->tables;
 

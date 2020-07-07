@@ -10,20 +10,20 @@ class PhpunitTestCaseTest extends PhpunitTestCase
 {
     public function testInit()
     {
-        $this->setDB($q = [
+        $this->setDb($q = [
             'user' => [
                 ['name' => 'John', 'surname' => 'Smith'],
                 ['name' => 'Steve', 'surname' => 'Jobs'],
             ],
         ]);
 
-        $q2 = $this->getDB('user');
+        $q2 = $this->getDb('user');
 
-        $this->setDB($q2);
-        $q3 = $this->getDB('user');
+        $this->setDb($q2);
+        $q3 = $this->getDb('user');
 
         $this->assertSame($q2, $q3);
 
-        $this->assertSame($q, $this->getDB('user', true));
+        $this->assertSame($q, $this->getDb('user', true));
     }
 }
