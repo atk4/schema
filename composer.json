@@ -36,6 +36,7 @@
       "homepage": "https://xsystems.io/"
     }
   ],
+  "version": "dev-develop",
   "minimum-stability": "dev",
   "prefer-stable": true,
   "config": {
@@ -47,7 +48,7 @@
   },
   "require-release": {
     "php": ">=7.3.0",
-    "atk4/data": "^2.0"
+    "atk4/data": "^2.2.0"
   },
   "require-dev": {
     "atk4/ui": "dev-develop",
@@ -56,7 +57,7 @@
     "phpunit/phpunit": ">=9.0"
   },
   "require-dev-release": {
-    "atk4/ui": "^2.0",
+    "atk4/ui": "^2.2.0",
     "friendsofphp/php-cs-fixer": "^2.16",
     "phpunit/phpcov": "*",
     "phpunit/phpunit": ">=9.0"
@@ -65,7 +66,7 @@
     "atk4/ui": "dev-develop"
   },
   "suggest-release": {
-    "atk4/ui": "^2.0"
+    "atk4/ui": "^2.2.0"
   },
   "autoload": {
     "psr-4": {
