@@ -25,7 +25,7 @@ class PhpunitTestCase extends AtkPhpunit\TestCase
     protected $dsn;
 
     /** @var string What DB driverType we use - mysql, sqlite, pgsql etc */
-    public $driverType = 'sqlite';
+    public $driverType;
 
     /**
      * Setup test database.
@@ -41,6 +41,11 @@ class PhpunitTestCase extends AtkPhpunit\TestCase
 
         $this->db = Persistence::connect($this->dsn, $user, $pass);
         $this->driverType = $this->db->connection->driverType;
+
+        // reset DB autoincrement to 1, tests rely on it
+        if ($this->driverType === \atk4\dsql\Mysql\Connection::defaultDriverType()) {
+            $this->db->connection->expr('SET @@auto_increment_offset=1, @@auto_increment_increment=1')->execute();
+        }
     }
 
     protected function tearDown(): void
