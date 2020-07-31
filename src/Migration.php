@@ -146,8 +146,8 @@ class Migration extends Expression
     public static function register(string $driverType, string $migrator = null)
     {
         // forward to generic Migration::register if called with a descendant class e.g Migration\Mysql::register
-        if (static::class !== __CLASS__) {
-            return call_user_func([__CLASS__, 'register'], $driverType, $migrator ?: static::class);
+        if (static::class !== self::class) {
+            return (self::class)::register($driverType, $migrator ?: static::class);
         } elseif (!$migrator) {
             throw (new Exception('Cannot register generic Migration class'))
                 ->addMoreInfo('driverType', $driverType);
