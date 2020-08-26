@@ -6,7 +6,7 @@ include 'init.php';
 
 class User extends \atk4\data\Model
 {
-    public function init(): void
+    protected function init(): void
     {
         parent::init();
 
