@@ -605,7 +605,8 @@ class Migration extends Expression
             $res .= ' (' . implode(',', array_slice($a, 1)) . ')';
         }
 
-        if (!empty($options['ref_type']) && $options['ref_type'] !== self::REF_TYPE_NONE && $type === 'integer') {
+        if (!empty($options['ref_type']) && $options['ref_type'] !== self::REF_TYPE_NONE && $type === 'integer'
+            && !($this instanceof Migration\Postgresql)) {
             $res .= ' unsigned';
         }
 
