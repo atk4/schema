@@ -13,7 +13,7 @@ use atk4\data\Reference\HasOne;
 use atk4\dsql\Connection;
 use atk4\dsql\Expression;
 
-class Migration extends Expression
+abstract class Migration extends Expression
 {
     public const REF_TYPE_NONE = 0;
     public const REF_TYPE_LINK = 1;
@@ -561,13 +561,8 @@ class Migration extends Expression
     /**
      * Return database table descriptions.
      * DB engine specific.
-     *
-     * @todo Maybe convert to abstract function
      */
-    public function describeTable(string $table): array
-    {
-        return $this->connection->expr('pragma table_info({})', [$table])->get();
-    }
+    abstract public function describeTable(string $table);
 
     /**
      * Convert SQL field types to Agile Data field types.

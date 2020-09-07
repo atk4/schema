@@ -19,4 +19,9 @@ class Oracle extends Migration
     public $mapToAgile = [
         'date' => ['datetime'],
     ];
+
+    public function describeTable(string $table): array
+    {
+        return $this->connection->expr('pragma table_info({})', [$table])->get();
+    }
 }

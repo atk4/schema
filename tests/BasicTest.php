@@ -8,7 +8,7 @@ use atk4\core\Exception;
 use atk4\schema\Migration;
 use atk4\schema\PhpunitTestCase;
 
-class CustomMysqlMigrator extends Migration
+class CustomMysqlMigrator extends Migration\Mysql
 {
 }
 

@@ -6,29 +6,16 @@ namespace atk4\schema\Migration;
 
 class Sqlite extends \atk4\schema\Migration
 {
-    /** @var string expression to create primary key */
-    public $primary_key_expr = 'primary key autoincrement';
-
     /** @var array use this array in extended classes to overwrite or extend values of default mapping */
     public $mapToAgile = [
         0 => ['string'],
     ];
 
-    /**
-     * Return database table descriptions.
-     * DB engine specific.
-     */
     public function describeTable(string $table): array
     {
         return $this->connection->expr('pragma table_info({})', [$table])->get();
     }
 
-    /**
-     * Convert Agile Data field types to SQL field types.
-     *
-     * @param string|null $type    Agile Data field type
-     * @param array       $options More options
-     */
     public function getSqlFieldType(?string $type, array $options = []): ?string
     {
         $res = parent::getSqlFieldType($type, $options);

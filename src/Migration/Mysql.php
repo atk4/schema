@@ -31,10 +31,6 @@ class Mysql extends \atk4\schema\Migration
         'longblob' => ['text'],
     ];
 
-    /**
-     * Return database table descriptions.
-     * DB engine specific.
-     */
     public function describeTable(string $table): array
     {
         if (!$this->connection->expr('show tables like []', [$table])->get()) {

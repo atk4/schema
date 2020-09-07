@@ -27,10 +27,6 @@ class Postgresql extends \atk4\schema\Migration
         'time' => ['time'],
     ];
 
-    /**
-     * Return database table descriptions.
-     * DB engine specific.
-     */
     public function describeTable(string $table): array
     {
         $columns = $this->connection->expr('SELECT * FROM information_schema.COLUMNS WHERE TABLE_NAME = []', [$table])->get();
@@ -53,9 +49,6 @@ class Postgresql extends \atk4\schema\Migration
         return $result;
     }
 
-    /**
-     * Renders statement.
-     */
     public function _render_statements(): string
     {
         $result = [];

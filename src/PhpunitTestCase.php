@@ -134,19 +134,19 @@ class PhpunitTestCase extends AtkPhpunit\TestCase
                 $has_id = (bool) key($data);
 
                 foreach ($data as $id => $row) {
-                    $migrator = $this->db->dsql();
+                    $query = $this->db->dsql();
                     if ($id === '_') {
                         continue;
                     }
 
-                    $migrator->table($table);
-                    $migrator->set($row);
+                    $query->table($table);
+                    $query->set($row);
 
                     if (!isset($row['id']) && $has_id) {
-                        $migrator->set('id', $id);
+                        $query->set('id', $id);
                     }
 
-                    $migrator->insert();
+                    $query->insert();
                 }
             }
         }
