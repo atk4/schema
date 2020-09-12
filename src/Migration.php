@@ -96,6 +96,7 @@ abstract class Migration extends Expression
         'mysql' => Migration\Mysql::class,
         'pgsql' => Migration\Postgresql::class,
         'oci' => Migration\Oracle::class,
+        'sqlsrv' => Migration\Mssql::class,
     ];
 
     /**

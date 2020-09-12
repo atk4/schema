@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace atk4\schema\Migration;
 
-// ONLY PARTIALLY IMPLEMENTED
 class Postgresql extends \atk4\schema\Migration
 {
     /** @var string Expression to create primary key */
