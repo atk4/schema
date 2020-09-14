@@ -593,7 +593,7 @@ abstract class Migration extends Expression
             $type = strtolower($type);
         }
 
-        $map = array_merge($this->defaultMapToPersistence, $this->mapToPersistence);
+        $map = array_replace($this->defaultMapToPersistence, $this->mapToPersistence);
         $a = array_key_exists($type, $map) ? $map[$type] : $map[0];
 
         $res = $a[0];

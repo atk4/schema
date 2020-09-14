@@ -12,7 +12,7 @@ use atk4\dsql\Connection;
 // NOTE: This class should stay here in this namespace because other repos rely on it. For example, atk4\data tests
 class PhpunitTestCase extends AtkPhpunit\TestCase
 {
-    /** @var \atk4\data\Persistence Persistence instance */
+    /** @var Persistence|Persistence\Sql Persistence instance */
     public $db;
 
     /** @var array Array of database table names */
