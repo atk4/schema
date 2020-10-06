@@ -24,7 +24,7 @@ class MigratorConsole extends \atk4\ui\Console
         $this->set(function ($console) use ($models) {
             $console->notice('Preparing to migrate models');
 
-            $persistence = $console->app->db;
+            $persistence = $console->getApp()->db;
 
             foreach ($models as $model) {
                 if (!is_object($model)) {

@@ -285,7 +285,7 @@ abstract class Migration extends Expression
             $reference_their_field = $property->getValue($field->reference);
 
             /** @var string $reference_field reference field name */
-            $reference_field = $reference_their_field ?? $field->reference->owner->id_field;
+            $reference_field = $reference_their_field ?? $field->reference->getOwner()->id_field;
 
             /** @var string $reference_model_class reference class fqcn */
             $reference_model_class = $field->reference->model;
