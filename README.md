@@ -1,3 +1,9 @@
+# !!! repo was integrated into atk4/data !!!
+
+# [https://github.com/atk4/data](https://github.com/atk4/data)
+
+<br><br><br><br>
+
 # Agile Data - SQL Schema Management Add-on
 
 This extension for Agile Data implements ability to work with SQL schema, execute migrations, perform DB-tests in PHPUnit (used by other ATK frameworks) and sync up "Model" structure to the database.
