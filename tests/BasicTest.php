@@ -7,6 +7,7 @@ namespace atk4\schema\tests;
 use atk4\core\Exception;
 use atk4\schema\Migration;
 use atk4\schema\PhpunitTestCase;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 
 class CustomMysqlMigrator extends Migration\Mysql
 {
@@ -53,7 +54,7 @@ class BasicTest extends PhpunitTestCase
      */
     public function testCreateAndDrop()
     {
-        if ($this->driverType === 'sqlite') {
+        if ($this->getDatabasePlatform() instanceof SqlitePlatform) {
             $this->markTestSkipped('SQLite does not support DROP');
         }
 
@@ -100,19 +101,19 @@ class BasicTest extends PhpunitTestCase
         // get original migrator registration
         $origMigratorClass = get_class($this->getMigrator());
 
-        Migration::register($this->driverType, CustomMysqlMigrator::class);
+        Migration::register(get_class($this->getDatabasePlatform()), CustomMysqlMigrator::class);
 
         $this->assertSame(CustomMysqlMigrator::class, get_class($this->getMigrator()));
 
-        CustomMysqlMigrator::register($this->driverType);
+        CustomMysqlMigrator::register(get_class($this->getDatabasePlatform()));
 
         $this->assertSame(CustomMysqlMigrator::class, get_class($this->getMigrator()));
 
         // restore original migrator registration
-        Migration::register($this->driverType, $origMigratorClass);
+        Migration::register(get_class($this->getDatabasePlatform()), $origMigratorClass);
 
         $this->expectException(Exception::class);
 
-        Migration::register($this->driverType, CustomMigrator::class);
+        Migration::register(get_class($this->getDatabasePlatform()), CustomMigrator::class);
     }
 }

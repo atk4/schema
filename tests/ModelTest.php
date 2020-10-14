@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace atk4\schema\tests;
 
 use atk4\schema\PhpunitTestCase;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 
 class ModelTest extends PhpunitTestCase
 {
@@ -75,7 +76,7 @@ class ModelTest extends PhpunitTestCase
      */
     public function testMigrateTable()
     {
-        if ($this->driverType === 'sqlite') {
+        if ($this->getDatabasePlatform() instanceof SqlitePlatform) {
             // http://www.sqlitetutorial.net/sqlite-alter-table/
             $this->markTestSkipped('SQLite does not support DROP COLUMN in ALTER TABLE');
         }

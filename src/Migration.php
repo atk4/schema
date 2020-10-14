@@ -12,6 +12,7 @@ use atk4\data\Persistence;
 use atk4\data\Reference\HasOne;
 use atk4\dsql\Connection;
 use atk4\dsql\Expression;
+use Doctrine\DBAL\Platforms;
 
 abstract class Migration extends Expression
 {
@@ -81,22 +82,22 @@ abstract class Migration extends Expression
     public $mapToAgile = [];
 
     /**
-     * Stores migrator class to use based on driverType.
+     * Stores migrator class to use based on Platform class.
      *
      * Visibility is intentionally set to private.
-     * If generic class Migration::of($source) is called, the migrator class will be resolved based on driverType of $source.
-     * When specific migrator class e.g Migration\Mysql::of($source) is called, driverType will not be resolved (the $registry property is NOT visible).
+     * If generic class Migration::of($source) is called, the migrator class will be resolved based on connection's Platform class of $source.
+     * When specific migrator class e.g Migration\Mysql::of($source) is called, connection's Platform class will not be resolved (the $registry property is NOT visible).
      * Mysql migrator class will be used explicitly.
      *
      * @var array
      *
      * */
     private static $registry = [
-        'sqlite' => Migration\Sqlite::class,
-        'mysql' => Migration\Mysql::class,
-        'pgsql' => Migration\Postgresql::class,
-        'oci' => Migration\Oracle::class,
-        'sqlsrv' => Migration\Mssql::class,
+        Platforms\SqlitePlatform::class => Migration\Sqlite::class,
+        Platforms\MySqlPlatform::class => Migration\Mysql::class,
+        Platforms\PostgreSqlPlatform::class => Migration\Postgresql::class,
+        Platforms\OraclePlatform::class => Migration\Oracle::class,
+        Platforms\SQLServerPlatform::class => Migration\Mssql::class,
     ];
 
     /**
@@ -119,17 +120,22 @@ abstract class Migration extends Expression
     {
         $connection = static::getConnection($source);
 
-        $migrator = self::$registry[$connection->driverType] ?? static::class;
+        $migratorClass = null;
+        foreach (self::$registry as $platformClass => $class) {
+            if ($connection->getDatabasePlatform() instanceof $platformClass) {
+                $migratorClass = $class;
+            }
+        }
 
         // if used within a subclass Migration method will create migrator of that class
         // if $migrator class is the generic class Migration then migrator was not resolved correctly
-        if ($migrator === __CLASS__) {
+        if ($migratorClass === null) {
             throw (new Exception('Not sure which migration class to use for your DSN'))
-                ->addMoreInfo('driverType', $connection->driverType)
+                ->addMoreInfo('platform', $connection->getDatabasePlatform())
                 ->addMoreInfo('source', $source);
         }
 
-        return new $migrator($source, $params);
+        return new $migratorClass($source, $params);
     }
 
     /**
@@ -137,39 +143,27 @@ abstract class Migration extends Expression
      *
      * Can be used as:
      *
-     * Migration::register('mysql', CustomMigration\Mysql), or
+     * Migration::register(new Platforms\MySQLPlatform(), CustomMigration\Mysql), or
      * CustomMigration\Mysql::register('mysql')
      *
      * CustomMigration\Mysql must be descendant of Migration class.
-     *
-     * @param string $migrator
      */
-    public static function register(string $driverType, string $migrator = null)
+    public static function register(string $platformClass, string $migratorClass = null)
     {
         // forward to generic Migration::register if called with a descendant class e.g Migration\Mysql::register
         if (static::class !== self::class) {
-            return (self::class)::register($driverType, $migrator ?: static::class);
-        } elseif (!$migrator) {
+            return (self::class)::register($platformClass, $migratorClass ?: static::class);
+        } elseif (!$migratorClass) {
             throw (new Exception('Cannot register generic Migration class'))
-                ->addMoreInfo('driverType', $driverType);
+                ->addMoreInfo('platform_class', $platformClass);
         }
 
-        if (!is_subclass_of($migrator, self::class)) {
+        if (!is_subclass_of($migratorClass, self::class)) {
             throw (new Exception('Migrator must be descendant to generic Migration class'))
-                ->addMoreInfo('migrator', $migrator);
+                ->addMoreInfo('migrator_class', $migratorClass);
         }
 
-        if (is_array($drivers = $driverType)) {
-            foreach ($drivers as $driver => $migrator) {
-                // self must be used instead of static as $registry property is private
-                // it is available only to generic Migrator class
-                self::register($driver, $migrator);
-            }
-
-            return;
-        }
-
-        self::$registry[$driverType] = $migrator;
+        self::$registry[$platformClass] = $migratorClass;
     }
 
     /**

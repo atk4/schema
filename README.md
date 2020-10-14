@@ -57,7 +57,7 @@ Other SQL databases are not yet natively supported but you can register your mig
 // $dbDriver is the connection driver name
 // MyCustomMigrator::class should be extending \atk4\schema\Migration
 
-\atk4\schema\Migration::register($dbDriver, MyCustomMigrator::class);
+\atk4\schema\Migration::register($platformClass, MyCustomMigrator::class);
 
 ```
 
